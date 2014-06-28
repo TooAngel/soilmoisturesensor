@@ -2,6 +2,7 @@ import serial
 from serial.serialutil import SerialException
 
 def main():
+    print 'Started'
     try:
         ser = serial.Serial('/dev/ttyACM0', 9600)
     except SerialException:
