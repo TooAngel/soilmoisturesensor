@@ -1,0 +1,14 @@
+
+
+
+
+
+.build/leonardo/src/arduino.cpp : src/arduino.ino
+	@mkdir -p .build/leonardo/src
+	@echo [93msrc/arduino.ino[0m
+	@/home/tw/.virtualenvs/soilmoisturesensor/bin/ino preproc  -o $@ $^
+
+
+all : .build/leonardo/src/arduino.cpp
+	@true
+
