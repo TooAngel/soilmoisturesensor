@@ -12,8 +12,9 @@ def main():
         ser = serial.Serial('/dev/ttyACM1', 9600)
     
     while 1 :
-        host = '192.168.1.173:5000'
-        measure = ser.readline().strip()
+#         host = 'http://192.168.1.173:5000'
+        host = 'https://sensors.cloudcontrolapp.com'
+        measure = int(ser.readline().strip())
         date = time.time()
         data = {'data': date, 'measure': measure}
         print requests.post('http://{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
