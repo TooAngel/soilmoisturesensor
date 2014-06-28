@@ -13,7 +13,7 @@ def main():
     
     while 1 :
         host = '192.168.1.173:5000'
-        measure = ser.readline()
+        measure = ser.readline().strip()
         date = time.time()
         data = {'data': date, 'measure': measure}
         print requests.post('http://{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
