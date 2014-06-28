@@ -10,10 +10,8 @@ void setup() {
 void loop() {
   // read the value from the sensor:
   sensorValue = analogRead(sensorPin);    
-  //Serial.print("VG400: ");
   Serial.println(sensorValue);
-
   
-  delay(1000);  
+  delay(60000);  
 }
 
