@@ -12,8 +12,8 @@ def main():
         ser = serial.Serial('/dev/ttyACM1', 9600)
     
     while 1 :
-#         host = 'http://192.168.1.173:5000'
-        host = 'https://sensors.cloudcontrolapp.com'
+        host = 'http://192.168.1.173:5000'
+#         host = 'https://sensors.cloudcontrolapp.com'
         measure = int(ser.readline().strip())
         date = time.time()
         data = {'date': date, 'measure': measure}
