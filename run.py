@@ -17,7 +17,7 @@ def main():
         measure = int(ser.readline().strip())
         date = time.time()
         data = {'data': date, 'measure': measure}
-        print requests.post('http://{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
+        print requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
 
 if __name__ == '__main__':
     main()
