@@ -16,7 +16,7 @@ def main():
 #         host = 'https://sensors.cloudcontrolapp.com'
         measure = int(ser.readline().strip())
         date = time.time()
-        data = {'data': [date, measure]}
+        data = {'date': date, 'measure': measure}
         response = requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
         if response.status_code != 200:
             print response.content
