@@ -1,7 +1,11 @@
 import serial
+from serial.serialutil import SerialException
 
 def main():
-    ser = serial.Serial('/dev/ttyACM0', 9600)
+    try:
+        ser = serial.Serial('/dev/ttyACM0', 9600)
+    except SerialException:
+        ser = serial.Serial('/dev/ttyACM1', 9600)
     
     while 1 :
         ser.readline()
