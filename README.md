@@ -3,8 +3,80 @@ Soil moisture sensor
 
 Soil Moisture Sensor Probe Wiring Table
 
-Bare	Ground
-Red	POWER:  3.3V to 20 VDC.
-Black	OUT: (0 to 3V related  to moisture content.)
+Bare    Ground
+Red     POWER:  3.3V to 20 VDC.
+Black   OUT: (0 to 3V related  to moisture content.)
 
 
+Soil moisture (SM)
+Raspberry PI (RPI)
+
+SM Ground -> Steckbrett -> Stecklitze -> RPI Ground
+SM 3.3 V -> Steckbrett -> Stecklitze -> -> RPI 3.3 V
+SM OUT -> Steckbrett -> Stecklitze -> -> RPI GPI
+
+
+Homemade
+========
+
+http://gardenbot.org/howTo/soilMoisture/
+
+galvanized steel wire -- 12 gage or equivalent (2 mm stahl draht)
+packing foam block (e.g. inside a product box for home electronics) -- the slightly flexible kind is better (less brittle than styrofoam)
+soldering iron and solder
+lead wires
+
+
+
+TODO
+=====
+Make image to text
+
+
+Arduino
+=====
+
+Create a lib/Config/Config.h
+
+    #define HOSTNAME "sensors.cloudcontrolapp.com"
+    #define BSSID "WIFI name"
+    #define PASSWORD "WIFI password"
+    #define NAME "Name of sensor"
+
+
+    ino build
+    ino upload
+
+
+Compare
+=====
+With FOM/mts - Field Operated Meter
+Date      |    this  | FOM
+------------------------------
+2014-07-03 19:00 |   227  | 9%
+2014-07-04 09:00 |   287  | 19,2%
+2014-07-04 09:30 |   271  | 12,5%
+2014-07-04 10:00 |   268  | 10,8%
+2014-07-04 10:13 |   356  | 22,9%
+2014-07-06 20:44 |   262  | 10,5%
+2014-07-09 08:40 |   352?  | 17,3%
+2014-07-09 18:48 |   326  | 11,7%
+2014-07-11 07:54 |   267  | 3,5%
+2014-07-11 08:09 |   299  | 13,6%
+2014-07-11 08:22 |   359  | 24,0%
+
+
+First test calculation
+====
+
+http://www.arndt-bruenner.de/mathe/9/geradedurchzweipunkte.htm
+
+             y2 - y1      24 - 68/5
+      m  =  —————————  =  —————————  =  13/75
+             x2 - x1      359 - 299
+
+      b  =  y2 - m·x2  =  24 - 13/75·359 = -2867/75
+
+ Gesuchte Funktion:
+
+    f(x) = 13/75·x - 2867/75

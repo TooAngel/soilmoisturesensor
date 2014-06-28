@@ -1,0 +1,5 @@
+git add .
+git commit -am "$@"
+git push frpi master
+ssh frpi 'cd ~/workspace/soilmoisturesensor-checkout; ./run.sh'
+
