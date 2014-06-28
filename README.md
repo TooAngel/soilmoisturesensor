@@ -32,3 +32,10 @@ TODO
 =====
 Make image to text
 
+
+Arduino
+=====
+
+    ino build
+    ino upload
+
