@@ -14,9 +14,12 @@ def main():
     while 1 :
 #         host = 'http://192.168.1.173:5000'
         host = 'https://sensors.cloudcontrolapp.com'
-        measure = int(ser.readline().strip())
+        data = ser.readline().strip()
+        print data
+        measure = int(data)
         date = time.time()
         data = {'date': date, 'measure': measure}
+        print data
         response = requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
         if response.status_code != 200:
             print response.content
