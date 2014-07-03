@@ -39,3 +39,8 @@ Arduino
     ino build
     ino upload
 
+
+Compare
+=====
+With FOM/mts - Field Operated Meter
+2014-07-03 this: 227 FOM: 9%	
