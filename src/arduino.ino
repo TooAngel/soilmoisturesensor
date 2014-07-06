@@ -5,7 +5,6 @@ int sensorPin = A0;
 int sensorValue = 0;
 
 void setup() {
-  uint8_t ret;
   Serial.begin(9600);
   Serial.println("Arduino starting");
   
@@ -17,6 +16,7 @@ void loop() {
 //  Serial.println(sensorValue);
   
 //  delay(1000);
+  uint8_t ret;
   delay(10000);
   ret = RedFly.init();
   Serial.print("RedFly.init: ");
