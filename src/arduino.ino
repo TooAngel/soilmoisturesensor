@@ -9,6 +9,7 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Arduino starting");
   
+  delay(10000);
   ret = RedFly.init();
   Serial.print("RedFly.init: ");
   Serial.println(ret);
