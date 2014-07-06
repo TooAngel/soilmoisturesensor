@@ -1,20 +1,20 @@
 #include <RedFly.h>
 #include <RedFlyClient.h>
 
-int sensorPin = A0;    // select the input pin for the potentiometer
-int sensorValue = 0;  // variable to store the value coming from the sensor
+int sensorPin = A0;
+int sensorValue = 0;
 
 void setup() {
-uint8_t ret;
-  Serial.begin(9600);           // set up Serial library at 9600 bps
-  Serial.println("Hello world!");  // prints hello with ending line break
+  uint8_t ret;
+  Serial.begin(9600);
+  Serial.println("Arduino starting");
   
   ret = RedFly.init();
-  Serial.println('init');
+  Serial.print("RedFly.init: ");
   Serial.println(ret);
   RedFly.scan();
   ret = RedFly.join("TooWlan", "Man lebt nur einmal", INFRASTRUCTURE);
-  Serial.println('join');
+  Serial.print("RedFly.join: ");
   Serial.println(ret);
 }
 
