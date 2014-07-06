@@ -9,13 +9,13 @@ void setup() {
   Serial.begin(9600);
   Serial.println("Arduino starting");
   
-  ret = RedFly.init();
-  Serial.print("RedFly.init: ");
-  Serial.println(ret);
-  RedFly.scan();
-  ret = RedFly.join("TooWlan", "Man lebt nur einmal", INFRASTRUCTURE);
-  Serial.print("RedFly.join: ");
-  Serial.println(ret);
+//  ret = RedFly.init();
+//  Serial.print("RedFly.init: ");
+//  Serial.println(ret);
+//  RedFly.scan();
+//  ret = RedFly.join("TooWlan", "Man lebt nur einmal", INFRASTRUCTURE);
+//  Serial.print("RedFly.join: ");
+//  Serial.println(ret);
 }
 
 void loop() {
@@ -23,6 +23,6 @@ void loop() {
   sensorValue = analogRead(sensorPin);    
   Serial.println(sensorValue);
   
-  delay(60000);  
+  delay(1000);
 }
 
