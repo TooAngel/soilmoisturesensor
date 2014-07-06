@@ -5,16 +5,16 @@ import json
 import time
 
 def connect():
-    while True:
+#     while True:
+    try:
         try:
-            try:
-                return serial.Serial('/dev/ttyACM0', 9600)
-            except SerialException as e:
-                print e
-                return serial.Serial('/dev/ttyACM1', 9600)
-        except OSError as e:
+            return serial.Serial('/dev/ttyACM0', 9600)
+        except SerialException as e:
             print e
-            pass
+            return serial.Serial('/dev/ttyACM1', 9600)
+    except OSError as e:
+        print e
+        pass
 
 def main():
     ser = connect()
