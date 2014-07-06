@@ -5,7 +5,7 @@ import json
 import time
 import logging
 
-logging.basicConfig()
+logging.basicConfig(level=logging.DEBUG)
 
 def connect():
     logging.debug('connect')
@@ -13,8 +13,12 @@ def connect():
         try:
             ser = serial.Serial(device, 9600)
         except SerialException as e:
-            print e
+            logging.exception('SerialException')
             continue
+        except OSError as e:
+            logging.exception('OSError')
+            continue
+            
         logging.debug('Device: {}'.format(device))
         return ser
 
