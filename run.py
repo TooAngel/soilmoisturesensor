@@ -11,7 +11,7 @@ def connect():
                 return serial.Serial('/dev/ttyACM0', 9600)
             except SerialException:
                 return serial.Serial('/dev/ttyACM1', 9600)
-        except IOError:
+        except OSError:
             pass
 
 def main():
