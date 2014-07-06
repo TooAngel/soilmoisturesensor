@@ -3,18 +3,20 @@ from serial.serialutil import SerialException
 import requests
 import json
 import time
+import logging
+
+logging.basicConfig()
 
 def connect():
-#     while True:
-#     try:
-    try:
-        return serial.Serial('/dev/ttyACM0', 9600)
-    except SerialException as e:
-        print e
-        return serial.Serial('/dev/ttyACM1', 9600)
-#     except OSError as e:
-#         print e
-#         pass
+    logging.debug('connect')
+    for device in ['/dev/ttyACM0', '/dev/ttyACM1']:
+        try:
+            ser = serial.Serial(device, 9600)
+        except SerialException as e:
+            print e
+            continue
+        logging.debug('Device: {}'.format(device))
+        return ser
 
 def main():
     ser = connect()
