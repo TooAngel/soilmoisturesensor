@@ -9,9 +9,11 @@ def connect():
         try:
             try:
                 return serial.Serial('/dev/ttyACM0', 9600)
-            except SerialException:
+            except SerialException as e:
+                print e
                 return serial.Serial('/dev/ttyACM1', 9600)
-        except OSError:
+        except OSError as e:
+            print e
             pass
 
 def main():
@@ -20,7 +22,8 @@ def main():
         host = 'https://sensors.cloudcontrolapp.com'
         try:
             data = ser.readline().strip()
-        except SerialException:
+        except SerialException as e:
+            print e
             connect()
             continue
         print data
