@@ -5,16 +5,18 @@ import json
 import time
 
 def connect():
-    try:
-        ser = serial.Serial('/dev/ttyACM0', 9600)
-    except SerialException:
-        ser = serial.Serial('/dev/ttyACM1', 9600)
-    return ser
+    while True:
+        try:
+            try:
+                return serial.Serial('/dev/ttyACM0', 9600)
+            except SerialException:
+                return serial.Serial('/dev/ttyACM1', 9600)
+        except IOError:
+            pass
 
 def main():
-    print 'Started'
     ser = connect()
-    while 1 :
+    while True:
         host = 'https://sensors.cloudcontrolapp.com'
         try:
             data = ser.readline().strip()
