@@ -31,9 +31,9 @@ def main():
         date = time.time()
         data = {'date': date, 'measure': measure}
         print data
-        response = requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
-        if response.status_code != 200:
-            print response.content
+#         response = requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
+#         if response.status_code != 200:
+#             print response.content
 
 if __name__ == '__main__':
     main()
