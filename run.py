@@ -4,17 +4,23 @@ import requests
 import json
 import time
 
-def main():
-    print 'Started'
+def connect():
     try:
         ser = serial.Serial('/dev/ttyACM0', 9600)
     except SerialException:
         ser = serial.Serial('/dev/ttyACM1', 9600)
-    
+    return ser
+
+def main():
+    print 'Started'
+    ser = connect()
     while 1 :
-#         host = 'http://192.168.1.173:5000'
         host = 'https://sensors.cloudcontrolapp.com'
-        data = ser.readline().strip()
+        try:
+            data = ser.readline().strip()
+        except SerialException:
+            connect()
+            continue
         print data
         measure = int(data)
         date = time.time()
