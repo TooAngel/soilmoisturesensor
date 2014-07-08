@@ -34,14 +34,17 @@ def main():
             print e
             connect()
             continue
-        print data
-        measure = int(data)
-        date = time.time()
-        data = {'date': date, 'measure': measure}
-        print data
-#         response = requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
-#         if response.status_code != 200:
-#             print response.content
+        logging.debug(data)
+        try:
+            measure = int(data)
+            date = time.time()
+            data = {'date': date, 'measure': measure}
+            print data
+    #         response = requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
+    #         if response.status_code != 200:
+    #             print response.content
+        except ValueError:
+            pass
 
 if __name__ == '__main__':
     main()
