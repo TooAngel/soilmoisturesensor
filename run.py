@@ -9,18 +9,20 @@ logging.basicConfig(level=logging.DEBUG)
 
 def connect():
     logging.debug('connect')
-    for device in ['/dev/ttyACM0', '/dev/ttyACM1']:
-        try:
-            ser = serial.Serial(device, 9600)
-        except SerialException as e:
-            logging.exception('SerialException')
-            continue
-        except OSError as e:
-            logging.exception('OSError')
-            continue
-            
-        logging.debug('Device: {}'.format(device))
-        return ser
+    while True:
+        for device in ['/dev/ttyACM0', '/dev/ttyACM1']:
+            try:
+                ser = serial.Serial(device, 9600)
+            except SerialException as e:
+                logging.exception('SerialException')
+                continue
+            except OSError as e:
+                logging.exception('OSError')
+                continue
+                
+            logging.debug('Device: {}'.format(device))
+            return ser
+        time.sleep(1)
 
 def main():
     ser = connect()
