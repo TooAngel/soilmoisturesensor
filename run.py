@@ -15,14 +15,16 @@ def connect():
                 ser = serial.Serial(device, 9600)
             except SerialException as e:
                 logging.exception('SerialException')
+                time.sleep(5)
                 continue
             except OSError as e:
                 logging.exception('OSError')
+                time.sleep(5)
                 continue
                 
             logging.debug('Device: {}'.format(device))
             return ser
-        time.sleep(1)
+        time.sleep(10)
 
 def main():
     ser = connect()
