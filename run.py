@@ -5,7 +5,7 @@ import json
 import time
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(module)s.%(funcName)s%(args)s %(lineno)d: %(message)s')
 
 def connect():
     logging.debug('connect')

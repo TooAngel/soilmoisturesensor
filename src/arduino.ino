@@ -6,15 +6,51 @@ int port = 80;
 int sensorPin = A0;    // select the input pin for the potentiometer
 int sensorValue = 0;  // variable to store the value coming from the sensor
 
-#define HOSTNAME "sensors.cloudcontrolled.com"  //host
+#define HOSTNAME "sensors.cloudcontrolled.com"
+#define BSSID "TooWLAN"
+#define PASSWORD "Man lebt nur einmal"
+
+bool connected = false;
 
 RedFlyClient client(server, 80);
-
-String prefix, postfix, add_value, result;
 
 char data[1024];  //receive buffer
 unsigned int len = 0; //receive buffer length
 
+void setup() {
+#if defined(__AVR_ATmega32U4__) //Leonardo boards use USB for communication
+	Serial.begin(9600); //init serial port and set baudrate
+	while(!Serial);//wait for serial port to connect (needed for Leonardo only)
+#endif
+
+	connect();
+}
+
+void connect() {
+	uint8_t ret;
+	ret = RedFly.init();
+	if (ret) {
+		Serial.println("INIT ERROR");
+		connected = false;
+	} else {
+		RedFly.scan();
+		ret = RedFly.join(BSSID, PASSWORD);
+		if (ret) {
+			Serial.println("JOIN ERROR");
+			RedFly.disconnect();
+			connected = false;
+		} else {
+			ret = RedFly.begin();
+			if (ret) {
+				Serial.println("BEGIN ERROR");
+				RedFly.disconnect();
+				connected = false;
+			} else {
+				connected = true;
+			}
+		}
+	}
+}
 
 void print_response() {
 	int c;
@@ -48,7 +84,7 @@ bool send_request() {
 
 	if (client.connect(server, port)) {
 		//make a HTTP request
-		Serial.println("write");
+		Serial.println("Send Request");
 		client.write(resultChar);
 		return true;
 	} else {
@@ -65,21 +101,18 @@ bool send_request() {
 	}
 }
 
-void update_server() {
-	Serial.println("getip");
+bool update_server() {
+	Serial.println("RedFly.getip");
 	if (RedFly.getip(HOSTNAME, server) == 0) {
 		return true;
 	} else {
 		Serial.print("DNS ERR: ");
 		Serial.println(HOSTNAME);
-		return false
+		return false;
 	}
 }
 
 void get_request_data(char* resultChar) {
-	Serial.println("read sensor");
-	sensorValue = analogRead(sensorPin);
-
 	String data =
 			"POST /sensors/hugo/points/ HTTP/1.1\r\nHost: "HOSTNAME"\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
 	data += sensorValue;
@@ -89,50 +122,28 @@ void get_request_data(char* resultChar) {
 //	Serial.println(resultChar);
 }
 
-void setup() {
-	uint8_t ret;
+void loop() {
+	if (!connected) {
+		Serial.println("Reconnect");
+		delay(1000);
+		connect();
+	}
+	client = RedFlyClient(server, 80);
 
-#if defined(__AVR_ATmega32U4__) //Leonardo boards use USB for communication
-	Serial.begin(9600); //init serial port and set baudrate
-	while(!Serial);//wait for serial port to connect (needed for Leonardo only)
-#endif
+	Serial.print("Read sensor: ");
+	sensorValue = analogRead(sensorPin);
+	Serial.println(sensorValue);
 
-	Serial.println("init");
-	ret = RedFly.init();
-	if (ret) {
-		Serial.print("INIT ERR: ");
-		Serial.println(ret);
+	if (send_request()) {
+		print_response();
 	} else {
-		Serial.println("scan");
-		RedFly.scan();
-		ret = RedFly.join("TooWLAN", "Man lebt nur einmal");
-		if (ret) {
-			Serial.print("JOIN ERR: ");
-			Serial.println(ret);
-			for (;;)
-				; //do nothing forevermore
-		} else {
-			Serial.println("begin");
-			ret = RedFly.begin(); //DHCP
-			if (ret) {
-				Serial.print("BEGIN ERR: ");
-				Serial.println(ret);
-				RedFly.disconnect();
-				for (;;)
-					; //do nothing forevermore
-			} else {
-				// DONE
+		if (update_server()) {
+			if (send_request()) {
+				print_response();
 			}
 		}
 	}
-}
-
-void loop() {
-	if (update_server()) {
-		if (send_request()) {
-			print_response();
-		}
-	}
+	client.stop();
 	Serial.println("Wait");
 	delay(60000);
 }
