@@ -58,3 +58,17 @@ Date      |    this  | FOM
 2014-07-11 08:22 |   359  | 24,0%
 
 
+First test calculation
+====
+
+http://www.arndt-bruenner.de/mathe/9/geradedurchzweipunkte.htm
+
+             y2 - y1      24 - 68/5
+      m  =  —————————  =  —————————  =  13/75
+             x2 - x1      359 - 299
+
+      b  =  y2 - m·x2  =  24 - 13/75·359 = -2867/75
+
+ Gesuchte Funktion:
+
+    f(x) = 13/75·x - 2867/75
