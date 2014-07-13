@@ -1,12 +1,12 @@
 #include <RedFly.h>
 #include <RedFlyClient.h>
 
-byte server[] = { 192, 168, 178, 25 }; //{  85, 13,145,242 }; //ip from www.watterott.net (server)
+byte server[] = { 192, 168, 178, 25 };
 int port = 80;
-int sensorPin = A0;    // select the input pin for the potentiometer
-int sensorValue = 0;  // variable to store the value coming from the sensor
+int sensorPin = A0;
+int sensorValue = 0;
 
-#define HOSTNAME "sensors.cloudcontrolled.com"
+#define HOSTNAME "sensors.cloudcontrolapp.com"
 #define BSSID "TooWLAN"
 #define PASSWORD "Man lebt nur einmal"
 
@@ -20,7 +20,7 @@ unsigned int len = 0; //receive buffer length
 void setup() {
 #if defined(__AVR_ATmega32U4__) //Leonardo boards use USB for communication
 	Serial.begin(9600); //init serial port and set baudrate
-	while(!Serial);//wait for serial port to connect (needed for Leonardo only)
+//	while(!Serial);//wait for serial port to connect (needed for Leonardo only)
 #endif
 
 	connect();

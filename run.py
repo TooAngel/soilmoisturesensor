@@ -14,17 +14,14 @@ def connect():
             try:
                 ser = serial.Serial(device, 9600)
             except SerialException as e:
-                logging.exception('SerialException')
-                time.sleep(5)
+#                 logging.error('SerialException: {}'.format(e))
                 continue
             except OSError as e:
-                logging.exception('OSError')
-                time.sleep(5)
+#                 logging.error('OSError: {}'.format(e))
                 continue
                 
-            logging.debug('Device: {}'.format(device))
+            logging.info('Device: {}'.format(device))
             return ser
-        time.sleep(10)
 
 def main():
     ser = connect()
@@ -42,9 +39,9 @@ def main():
             date = time.time()
             data = {'date': date, 'measure': measure}
             print data
-    #         response = requests.post('{}/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
-    #         if response.status_code != 200:
-    #             print response.content
+            response = requests.post('/sensors/points/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
+            if response.status_code != 200:
+                print response.content
         except ValueError:
             pass
 
