@@ -17,12 +17,15 @@ RedFlyClient client(server, 80);
 char data[1024];  //receive buffer
 unsigned int len = 0; //receive buffer length
 
-void setup() {
-#if defined(__AVR_ATmega32U4__) //Leonardo boards use USB for communication
-	Serial.begin(9600); //init serial port and set baudrate
-//	while(!Serial);//wait for serial port to connect (needed for Leonardo only)
-#endif
+void log(String message) {
+	if (Serial) {
+		Serial.println(message);
+	}
+}
+	
 
+void setup() {
+	Serial.begin(9600);
 	connect();
 }
 
@@ -30,19 +33,19 @@ void connect() {
 	uint8_t ret;
 	ret = RedFly.init();
 	if (ret) {
-		Serial.println("INIT ERROR");
+		log("INIT ERROR");
 		connected = false;
 	} else {
 		RedFly.scan();
 		ret = RedFly.join(BSSID, PASSWORD);
 		if (ret) {
-			Serial.println("JOIN ERROR");
+			log("JOIN ERROR");
 			RedFly.disconnect();
 			connected = false;
 		} else {
 			ret = RedFly.begin();
 			if (ret) {
-				Serial.println("BEGIN ERROR");
+				log("BEGIN ERROR");
 				RedFly.disconnect();
 				connected = false;
 			} else {
@@ -72,8 +75,7 @@ void print_response() {
 		RedFly.disconnect();
 
 		data[len] = 0;
-		Serial.print(data);
-
+		log(data);
 		len = 0;
 	}
 }
@@ -84,55 +86,46 @@ bool send_request() {
 
 	if (client.connect(server, port)) {
 		//make a HTTP request
-		Serial.println("Send Request");
+		log("Send Request");
 		client.write(resultChar);
 		return true;
 	} else {
-		Serial.print("CLIENT ERR: ");
-		Serial.print(server[0]);
-		Serial.print(server[1]);
-		Serial.print(server[2]);
-		Serial.print(server[3]);
-		Serial.println(port);
+		log("CLIENT ERR: ");
 		return false;
-//		RedFly.disconnect();
-//		for (;;)
-//			; //do nothing forevermore
 	}
 }
 
 bool update_server() {
-	Serial.println("RedFly.getip");
+	log("RedFly.getip");
+	char* hostname_char;
 	if (RedFly.getip(HOSTNAME, server) == 0) {
 		return true;
 	} else {
-		Serial.print("DNS ERR: ");
-		Serial.println(HOSTNAME);
+		log("DNS ERR");
 		return false;
 	}
 }
 
 void get_request_data(char* resultChar) {
-	String data =
-			"POST /sensors/hugo/points/ HTTP/1.1\r\nHost: "HOSTNAME"\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
+	String data = "POST /sensors/hugo/points/ HTTP/1.1\r\nHost:";
+	data += HOSTNAME;
+	data += "\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
 	data += sensorValue;
 	data += "}\r\n";
 
 	data.toCharArray(resultChar, 255);
-//	Serial.println(resultChar);
 }
 
 void loop() {
 	if (!connected) {
-		Serial.println("Reconnect");
+		log("Reconnect");
 		delay(1000);
 		connect();
 	}
 	client = RedFlyClient(server, 80);
 
-	Serial.print("Read sensor: ");
 	sensorValue = analogRead(sensorPin);
-	Serial.println(sensorValue);
+	log("Read sensor: " + sensorValue);
 
 	if (send_request()) {
 		print_response();
@@ -144,6 +137,6 @@ void loop() {
 		}
 	}
 	client.stop();
-	Serial.println("Wait");
+	log("Wait");
 	delay(60000);
 }
