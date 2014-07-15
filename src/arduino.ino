@@ -11,6 +11,7 @@ int sensorValue = 0;
 #define PASSWORD "Man lebt nur einmal"
 
 bool connected = false;
+int state = 0;
 
 RedFlyClient client(server, 80);
 
@@ -22,72 +23,71 @@ void log(String message) {
 		Serial.println(message);
 	}
 }
-	
 
-void setup() {
-	Serial.begin(9600);
-	connect();
-}
-
-void connect() {
+bool rf_init() {
+	log("rf_init");
 	uint8_t ret;
-	ret = RedFly.init();
+	ret = RedFly.init(9600, LOW_POWER);
 	if (ret) {
 		log("INIT ERROR");
-		connected = false;
-	} else {
-		RedFly.scan();
-		ret = RedFly.join(BSSID, PASSWORD);
-		if (ret) {
-			log("JOIN ERROR");
-			RedFly.disconnect();
-			connected = false;
-		} else {
-			ret = RedFly.begin();
-			if (ret) {
-				log("BEGIN ERROR");
-				RedFly.disconnect();
-				connected = false;
-			} else {
-				connected = true;
-			}
-		}
+		return false;
 	}
+	return true;
 }
 
-void print_response() {
-	int c;
-
-	//if there are incoming bytes available 
-	//from the server then read them 
-	if (client.available()) {
-		do {
-			c = client.read();
-			if ((c != -1) && (len < (sizeof(data) - 1))) {
-				data[len++] = c;
-			}
-		} while (c != -1);
-	}
-
-	//if the server's disconnected, stop the client and print the received data
-	if (len && !client.connected()) {
-		client.stop();
+bool rf_join() {
+	log("rf_join");
+	uint8_t ret;
+	RedFly.scan();
+	ret = RedFly.join(BSSID, PASSWORD);
+	if (ret) {
+		log("JOIN ERROR");
 		RedFly.disconnect();
-
-		data[len] = 0;
-		log(data);
-		len = 0;
+		return false;
 	}
+	return true;
+
 }
 
-bool send_request() {
-	char resultChar[255];
-	get_request_data(resultChar);
+bool rf_begin() {
+	log("rf_begin");
+	uint8_t ret;
+	ret = RedFly.begin();
+	if (ret) {
+		log("BEGIN ERROR");
+		RedFly.disconnect();
+		connected = false;
+		return false;
+	}
+	return true;
+	
+}
 
+bool rf_set_client() {
+	log("rf_set_client");
+	client = RedFlyClient(server, 80);
+	return true;
+}
+
+bool get_ip() {
+	log("get_ip");
+	char* hostname_char;
+	if (RedFly.getip(HOSTNAME, server)) {
+		log("DNS ERR");
+		return false;
+	}
+	return true;
+}
+
+bool read_sensor() {
+	log("read_sensor");
+	sensorValue = analogRead(sensorPin);
+	return true;
+}
+
+bool connect() {
+	log("connect");
 	if (client.connect(server, port)) {
-		//make a HTTP request
-		log("Send Request");
-		client.write(resultChar);
 		return true;
 	} else {
 		log("CLIENT ERR: ");
@@ -95,15 +95,12 @@ bool send_request() {
 	}
 }
 
-bool update_server() {
-	log("RedFly.getip");
-	char* hostname_char;
-	if (RedFly.getip(HOSTNAME, server) == 0) {
-		return true;
-	} else {
-		log("DNS ERR");
-		return false;
-	}
+bool send_request() {
+	log("send_request");
+	char resultChar[255];
+	get_request_data(resultChar);
+	client.write(resultChar);
+	return true;
 }
 
 void get_request_data(char* resultChar) {
@@ -116,27 +113,31 @@ void get_request_data(char* resultChar) {
 	data.toCharArray(resultChar, 255);
 }
 
+bool (*states[8])();
+
+void setup() {
+	Serial.begin(9600);
+	states[0] = rf_init;
+	states[1] = rf_join;
+	states[2] = rf_begin;
+	states[3] = rf_set_client;
+	states[4] = get_ip;
+	states[5] = read_sensor;
+	states[6] = connect;
+	states[7] = send_request;
+}
+
 void loop() {
-	if (!connected) {
-		log("Reconnect");
-		delay(1000);
-		connect();
-	}
-	client = RedFlyClient(server, 80);
-
-	sensorValue = analogRead(sensorPin);
-	log("Read sensor: " + sensorValue);
-
-	if (send_request()) {
-		print_response();
-	} else {
-		if (update_server()) {
-			if (send_request()) {
-				print_response();
-			}
+	for (int i=state; i<8; i++) {
+		if(!(*states[i]) ()) {
+			log("failed");
+			state = max(0, state-1);
+			delay(1000);
+			return;
 		}
 	}
+	state = 7;
 	client.stop();
-	log("Wait");
+	log("wait");
 	delay(60000);
 }
