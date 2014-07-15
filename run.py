@@ -39,7 +39,7 @@ def main():
             date = time.time()
             data = {'date': date, 'measure': measure}
             print data
-            response = requests.post('/sensors/points/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
+            response = requests.post('{}/sensors/points/points/'.format(host), headers={'content-type': 'application/json'}, data=json.dumps(data))
             if response.status_code != 200:
                 print response.content
         except ValueError:
