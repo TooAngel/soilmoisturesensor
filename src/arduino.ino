@@ -136,7 +136,7 @@ void loop() {
 			return;
 		}
 	}
-	state = 7;
+	state = 6;
 	client.stop();
 	log("wait");
 	delay(60000);
