@@ -104,7 +104,7 @@ bool send_request() {
 }
 
 void get_request_data(char* resultChar) {
-	String data = "POST /sensors/hugo/points/ HTTP/1.1\r\nHost:";
+	String data = "POST /sensors/fifi/points/ HTTP/1.1\r\nHost:";
 	data += HOSTNAME;
 	data += "\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
 	data += sensorValue;
