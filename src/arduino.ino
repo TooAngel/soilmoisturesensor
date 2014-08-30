@@ -15,9 +15,6 @@ int state = 0;
 
 RedFlyClient client(server, 80);
 
-char data[1024];  //receive buffer
-unsigned int len = 0; //receive buffer length
-
 void log(String message) {
 	if (Serial) {
 		Serial.println(message);
@@ -60,7 +57,7 @@ bool rf_begin() {
 		return false;
 	}
 	return true;
-	
+
 }
 
 bool rf_set_client() {
@@ -98,24 +95,51 @@ bool connect() {
 bool send_request() {
 	log("send_request");
 	char resultChar[255];
+	
 	get_request_data(resultChar);
 	client.write(resultChar);
+
 	return true;
 }
 
 void get_request_data(char* resultChar) {
 	String data = "POST /sensors/fifi/points/ HTTP/1.1\r\nHost:";
 	data += HOSTNAME;
-	data += "\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
+	data +=	"\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
 	data += sensorValue;
 	data += "}\r\n";
 
 	data.toCharArray(resultChar, 255);
 }
 
+int read_response() {
+	log("read_response");
+	int a;
+	int c;
+	char data[1024];  //receive buffer
+	unsigned int len = 0; //receive buffer length
+
+	while (true) {
+		if (client.available()) {
+			log("client.available");
+			do {
+				c = client.read();
+				if ((c != -1) && (len < (sizeof(data) - 1))) {
+					data[len++] = c;
+				}
+			} while (c != -1);
+			data[len] = 0;
+			a = data[168] - '0';
+			len = 0;
+			return a;
+		}
+	}
+}
+
 bool (*states[8])();
 
 void setup() {
+	pinMode(12, OUTPUT);
 	Serial.begin(9600);
 	states[0] = rf_init;
 	states[1] = rf_join;
@@ -128,16 +152,27 @@ void setup() {
 }
 
 void loop() {
-	for (int i=state; i<8; i++) {
-		if(!(*states[i]) ()) {
+	int motorTime = 0;
+	for (int i = state; i < 8; i++) {
+		if (!(*states[i])()) {
 			log("failed");
-			state = max(0, state-1);
+			state = max(0, state - 1);
 			delay(1000);
 			return;
 		}
 	}
+	
+	motorTime = read_response();
+	if (motorTime > 0) {
+		log("Start motor");
+		log(String(motorTime));
+		digitalWrite(12, HIGH);
+		delay(motorTime * 1000);
+		digitalWrite(12, LOW);
+	}
+	
 	state = 5;
 	client.stop();
 	log("wait");
-	delay(60000);
+	delay(60000 - (motorTime * 1000));
 }
