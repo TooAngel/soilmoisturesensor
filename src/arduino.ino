@@ -17,28 +17,34 @@ RedFlyClient client(server, 80);
 
 void log(String message) {
 	if (Serial) {
+		Serial.print(message);
+	}
+}
+
+void logln(String message) {
+	if (Serial) {
 		Serial.println(message);
 	}
 }
 
 bool rf_init() {
-	log("rf_init");
+	logln("rf_init");
 	uint8_t ret;
 	ret = RedFly.init(9600, LOW_POWER);
 	if (ret) {
-		log("INIT ERROR");
+		logln("INIT ERROR");
 		return false;
 	}
 	return true;
 }
 
 bool rf_join() {
-	log("rf_join");
+	logln("rf_join");
 	uint8_t ret;
 	RedFly.scan();
 	ret = RedFly.join(BSSID, PASSWORD);
 	if (ret) {
-		log("JOIN ERROR");
+		logln("JOIN ERROR");
 		RedFly.disconnect();
 		return false;
 	}
@@ -47,11 +53,11 @@ bool rf_join() {
 }
 
 bool rf_begin() {
-	log("rf_begin");
+	logln("rf_begin");
 	uint8_t ret;
 	ret = RedFly.begin();
 	if (ret) {
-		log("BEGIN ERROR");
+		logln("BEGIN ERROR");
 		RedFly.disconnect();
 		connected = false;
 		return false;
@@ -61,39 +67,40 @@ bool rf_begin() {
 }
 
 bool rf_set_client() {
-	log("rf_set_client");
+	logln("rf_set_client");
 	client = RedFlyClient(server, 80);
 	return true;
 }
 
 bool get_ip() {
-	log("get_ip");
+	logln("get_ip");
 	char* hostname_char;
 	if (RedFly.getip(HOSTNAME, server)) {
-		log("DNS ERR");
+		logln("DNS ERR");
 		return false;
 	}
 	return true;
 }
 
 bool read_sensor() {
-	log("read_sensor");
+	log("read_sensor ");
 	sensorValue = analogRead(sensorPin);
+	logln(String(sensorValue));
 	return true;
 }
 
 bool connect() {
-	log("connect");
+	logln("connect");
 	if (client.connect(server, port)) {
 		return true;
 	} else {
-		log("CLIENT ERR: ");
+		logln("CLIENT ERR: ");
 		return false;
 	}
 }
 
 bool send_request() {
-	log("send_request");
+	logln("send_request");
 	char resultChar[255];
 	
 	get_request_data(resultChar);
@@ -113,7 +120,7 @@ void get_request_data(char* resultChar) {
 }
 
 int read_response() {
-	log("read_response");
+	logln("read_response");
 	int a;
 	int c;
 	char data[1024];  //receive buffer
@@ -121,7 +128,7 @@ int read_response() {
 
 	while (true) {
 		if (client.available()) {
-			log("client.available");
+			logln("client.available");
 			do {
 				c = client.read();
 				if ((c != -1) && (len < (sizeof(data) - 1))) {
@@ -155,7 +162,7 @@ void loop() {
 	int motorTime = 0;
 	for (int i = state; i < 8; i++) {
 		if (!(*states[i])()) {
-			log("failed");
+			logln("failed");
 			state = max(0, state - 1);
 			delay(1000);
 			return;
@@ -164,8 +171,8 @@ void loop() {
 	
 	motorTime = read_response();
 	if (motorTime > 0) {
-		log("Start motor");
-		log(String(motorTime));
+		logln("Start motor");
+		logln(String(motorTime));
 		digitalWrite(12, HIGH);
 		delay(motorTime * 1000);
 		digitalWrite(12, LOW);
@@ -173,6 +180,6 @@ void loop() {
 	
 	state = 5;
 	client.stop();
-	log("wait");
+	logln("wait");
 	delay(60000 - (motorTime * 1000));
 }
