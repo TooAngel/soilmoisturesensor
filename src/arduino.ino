@@ -121,6 +121,7 @@ void get_request_data(char* resultChar) {
 }
 
 int read_response() {
+	delay(2000);
 	logln("read_response");
 	int a = 0;
 	int c;
@@ -146,7 +147,7 @@ int read_response() {
 			break;
 		}
 	}
-	if (i == (max - 1)) {
+	if (i == max) {
 		logln("!!! Iteration limit reached.");
 	}
 	client.stop();
