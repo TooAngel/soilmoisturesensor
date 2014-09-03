@@ -126,8 +126,9 @@ int read_response() {
 	int c;
 	char data[1024];
 	unsigned int len = 0;
-
-	while (true) {
+	int i = 0;
+	int max = 1000;
+	for (i=0; i<max; i++) {
 		if (client.available()) {
 			logln("client.available");
 			do {
@@ -141,8 +142,12 @@ int read_response() {
 		}
 
 		if (!client.connected()) {
+			logln("client.disconnected");
 			break;
 		}
+	}
+	if (i == (max - 1)) {
+		logln("!!! Iteration limit reached.");
 	}
 	client.stop();
 	return a;
