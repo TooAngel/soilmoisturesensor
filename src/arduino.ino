@@ -102,7 +102,7 @@ bool connect() {
 bool send_request() {
 	logln("send_request");
 	char resultChar[255];
-	
+
 	get_request_data(resultChar);
 	client.write(resultChar);
 
@@ -112,7 +112,8 @@ bool send_request() {
 void get_request_data(char* resultChar) {
 	String data = "POST /sensors/fifi/points/ HTTP/1.1\r\nHost:";
 	data += HOSTNAME;
-	data +=	"\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
+	data +=
+			"\r\nContent-Type: application/json\r\nContent-length: 16\r\n\r\n{\"measure\": ";
 	data += sensorValue;
 	data += "}\r\n";
 
@@ -121,10 +122,10 @@ void get_request_data(char* resultChar) {
 
 int read_response() {
 	logln("read_response");
-	int a;
+	int a = 0;
 	int c;
-	char data[1024];  //receive buffer
-	unsigned int len = 0; //receive buffer length
+	char data[1024];
+	unsigned int len = 0;
 
 	while (true) {
 		if (client.available()) {
@@ -135,12 +136,16 @@ int read_response() {
 					data[len++] = c;
 				}
 			} while (c != -1);
-			data[len] = 0;
 			a = data[168] - '0';
-			len = 0;
-			return a;
+			break;
+		}
+
+		if (!client.connected()) {
+			break;
 		}
 	}
+	client.stop();
+	return a;
 }
 
 bool (*states[8])();
@@ -168,7 +173,7 @@ void loop() {
 			return;
 		}
 	}
-	
+
 	motorTime = read_response();
 	if (motorTime > 0) {
 		logln("Start motor");
@@ -177,9 +182,8 @@ void loop() {
 		delay(motorTime * 1000);
 		digitalWrite(12, LOW);
 	}
-	
+
 	state = 5;
-	client.stop();
 	logln("wait");
 	delay(60000 - (motorTime * 1000));
 }
