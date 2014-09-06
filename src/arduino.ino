@@ -121,12 +121,12 @@ void get_request_data(char* resultChar) {
 }
 
 int read_response() {
-	delay(2000);
 	logln("read_response");
 	int a = 0;
 	int c;
-	char data[1024];
 	unsigned int len = 0;
+	char data[1024];
+	data[len] = 0;
 	int i = 0;
 	int max = 1000;
 	for (i=0; i<max; i++) {
@@ -138,6 +138,7 @@ int read_response() {
 					data[len++] = c;
 				}
 			} while (c != -1);
+			data[len] = 0;
 			a = data[168] - '0';
 			break;
 		}
@@ -146,6 +147,7 @@ int read_response() {
 			logln("client.disconnected");
 			break;
 		}
+		delay(1);
 	}
 	if (i == max) {
 		logln("!!! Iteration limit reached.");
@@ -191,5 +193,5 @@ void loop() {
 
 	state = 5;
 	logln("wait");
-	delay(60000 - (motorTime * 1000));
+	delay(50000 - (motorTime * 1000));
 }
