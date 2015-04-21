@@ -63,12 +63,6 @@ bool rf_begin() {
 
 }
 
-bool rf_set_client() {
-	logln("rf_set_client");
-	client = RedFlyClient(server, 80);
-	return true;
-}
-
 bool get_ip() {
 	logln("get_ip");
 	char* hostname_char;
@@ -76,6 +70,12 @@ bool get_ip() {
 		logln("DNS ERR");
 		return false;
 	}
+	return true;
+}
+
+bool rf_set_client() {
+	logln("rf_set_client");
+	client = RedFlyClient(server, 80);
 	return true;
 }
 
@@ -161,8 +161,8 @@ void setup() {
 	states[0] = rf_init;
 	states[1] = rf_join;
 	states[2] = rf_begin;
-	states[3] = rf_set_client;
-	states[4] = get_ip;
+	states[3] = get_ip;
+	states[4] = rf_set_client;
 	states[5] = read_sensor;
 	states[6] = connect;
 	states[7] = send_request;
