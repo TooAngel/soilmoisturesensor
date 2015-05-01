@@ -1,7 +1,10 @@
 #include <RedFlyClient.h>
 
 typedef enum {
-        Start
+        ReadProtocol,
+        ReadStatusCode,
+        ReadStatusMessage,
+        ReadHeader
 } ParseState;
 
 int parse_response(RedFlyClient client);

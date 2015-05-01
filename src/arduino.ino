@@ -23,7 +23,7 @@ bool rf_init() {
     uint8_t pwr = MED_POWER;
     log("RedFly.init(");
     log(String(baud));
-    log(" ");
+    log(", ");
     log(String(pwr));
     logln(")");
     uint8_t ret;

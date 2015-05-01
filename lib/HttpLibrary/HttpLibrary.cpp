@@ -9,11 +9,56 @@ int receive_data(RedFlyClient client) {
     data[len] = 0;
 
     char c = '\0';
-    ParseState state = Start;
+    ParseState state = ReadProtocol;
+
+    int protocolPos = 0;
+    char protocol[10];
+    const char* protocolPrefix = "HTTP/*.* ";
+    const char* protocolPtr = protocolPrefix;
+    int statusMessagePos = 0;
+    char statusMessage[20];
+    int statusCode = 0;
 
     do {
         c = client.read();
         if (c != -1) {
+            switch(state) {
+                case ReadProtocol:
+                    if ( (*protocolPtr == '*') || (*protocolPtr == c) ) {
+                        protocol[protocolPos++] = c;
+                        protocolPtr++;
+                        if (*protocolPtr == '\0') {
+                            state = ReadStatusCode;
+                            protocol[protocolPos++] = '\0';
+                            log("Protocol: ");
+                            log(String(protocol));
+                            logln("");
+                        }
+                    }
+                    break;
+                case ReadStatusCode:
+                    if (isdigit(c)) {
+                        statusCode = statusCode * 10 + (c - '0');
+                    } else {
+                        state = ReadStatusMessage;
+                        log("Status: ");
+                        log(String(statusCode));
+                        logln("");
+                    }
+                    break;
+                case ReadStatusMessage:
+                    if (c == '\n') {
+                        statusMessage[statusMessagePos++] = '\0';
+                        log("Message: ");
+                        log(String(statusMessage));
+                        logln("");
+                        state = ReadHeader;
+                        break;
+                    }
+                    statusMessage[statusMessagePos++] = c;
+                    break;
+            }
+
             if (len < (sizeof(data) - 1)) {
                 data[len++] = c;
             } else {
@@ -31,6 +76,10 @@ int receive_data(RedFlyClient client) {
     logln (String(data));data
     [len] = 0;
     response = data[168] - '0';
+
+//    log(String(statusMessage));
+//    logln("");
+
     return response;
 }
 
