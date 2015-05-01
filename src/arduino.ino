@@ -25,23 +25,35 @@ void logln(String message) {
 }
 
 bool rf_init() {
-	logln("rf_init");
+	int baud = 9600;
+	uint8_t pwr = LOW_POWER;
+	log("RedFly.init(");
+	log(String(baud));
+	log(" ");
+	log(String(pwr));
+	logln(")");
 	uint8_t ret;
-	ret = RedFly.init(9600, LOW_POWER);
+	ret = RedFly.init(baud, pwr);
 	if (ret) {
-		logln("INIT ERROR");
+		log("INIT ERROR: ");
+		log(String(ret));
+		logln("");
 		return false;
 	}
 	return true;
 }
 
 bool rf_join() {
-	logln("rf_join");
+	log("RedFly.join: ");
+	log(String(BSSID));
+	logln("");
 	uint8_t ret;
 	RedFly.scan();
 	ret = RedFly.join(BSSID, PASSWORD);
 	if (ret) {
-		logln("JOIN ERROR");
+		log("JOIN ERROR: ");
+		log(String(ret));
+		logln("");
 		RedFly.disconnect();
 		return false;
 	}
@@ -50,11 +62,13 @@ bool rf_join() {
 }
 
 bool rf_begin() {
-	logln("rf_begin");
+	logln("RedFly.begin");
 	uint8_t ret;
 	ret = RedFly.begin();
 	if (ret) {
-		logln("BEGIN ERROR");
+		log("BEGIN ERROR");
+		log(String(ret));
+		logln("");
 		RedFly.disconnect();
 		connected = false;
 		return false;
@@ -64,7 +78,10 @@ bool rf_begin() {
 }
 
 bool get_ip() {
-	logln("get_ip");
+	log("RedFly.getip(");
+	log(String(HOSTNAME));
+	logln(")");
+	return true;
 	char* hostname_char;
 	if (RedFly.getip(HOSTNAME, server)) {
 		logln("DNS ERR");
@@ -74,20 +91,42 @@ bool get_ip() {
 }
 
 bool rf_set_client() {
-	logln("rf_set_client");
-	client = RedFlyClient(server, 80);
+	int port = 80;
+	log("RedFlyClient(");
+	log(String(server[0]));
+	log(".");
+	log(String(server[1]));
+	log(".");
+	log(String(server[2]));
+	log(".");
+	log(String(server[3]));
+	log(", ");
+	log(String(port));
+	logln(")");
+	client = RedFlyClient(server, port);
 	return true;
 }
 
 bool read_sensor() {
-	log("read_sensor ");
+	log("Read sensor value: ");
 	sensorValue = analogRead(sensorPin);
 	logln(String(sensorValue));
 	return true;
 }
 
 bool connect() {
-	logln("connect");
+	log("Connect to: ");
+	log(String(server[0]));
+	log(".");
+	log(String(server[1]));
+	log(".");
+	log(String(server[2]));
+	log(".");
+	log(String(server[3]));
+	log(":");
+	log(String(port));
+	logln("");
+//	logln("connect" + String(server));
 	if (client.connect(server, port)) {
 		return true;
 	} else {
@@ -97,12 +136,12 @@ bool connect() {
 }
 
 bool send_request() {
-	logln("send_request");
+	logln("client.write:");
 	char resultChar[255];
-
 	get_request_data(resultChar);
+	log(String(resultChar));
+	logln("");
 	client.write(resultChar);
-
 	return true;
 }
 
@@ -127,6 +166,7 @@ int read_response() {
 	int i = 0;
 	int max = 1000;
 	for (i=0; i<max; i++) {
+		log(".");
 		if (client.available()) {
 			logln("client.available");
 			do {
@@ -137,6 +177,7 @@ int read_response() {
 			} while (c != -1);
 			data[len] = 0;
 			a = data[168] - '0';
+			logln(String(data));
 			break;
 		}
 
