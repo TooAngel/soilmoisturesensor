@@ -1,7 +1,6 @@
 /*
  * Copyright 2015 Tobias Wilken
- */
-
+ */ 
 #include <RedFly.h>
 #include <RedFlyClient.h>
 #include <Config.h>
