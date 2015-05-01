@@ -5,7 +5,8 @@
 #include <RedFly.h>
 #include <RedFlyClient.h>
 #include <Config.h>
-#include <algorithm>
+#include <HttpLibrary.h>
+#include <Output.h>
 
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
@@ -17,21 +18,9 @@ int state = 0;
 
 RedFlyClient client(server, 80);
 
-void log(String message) {
-    if (Serial) {
-        Serial.print(message);
-    }
-}
-
-void logln(String message) {
-    if (Serial) {
-        Serial.println(message);
-    }
-}
-
 bool rf_init() {
-    int baud = 9600;
-    uint8_t pwr = LOW_POWER;
+    int baud = 19200;
+    uint8_t pwr = MED_POWER;
     log("RedFly.init(");
     log(String(baud));
     log(" ");
@@ -161,40 +150,9 @@ void get_request_data(char* resultChar) {
 
 int read_response() {
     logln("read_response");
-    int a = 0;
-    int c;
-    unsigned int len = 0;
-    char data[1024];
-    data[len] = 0;
-    int i = 0;
-    int max = 1000;
-    for (i=0; i < max; i++) {
-        log(".");
-        if (client.available()) {
-            logln("client.available");
-            do {
-                c = client.read();
-                if ((c != -1) && (len < (sizeof(data) - 1))) {
-                    data[len++] = c;
-                }
-            } while (c != -1);
-            data[len] = 0;
-            a = data[168] - '0';
-            logln(String(data));
-            break;
-        }
-
-        if (!client.connected()) {
-            logln("client.disconnected");
-            break;
-        }
-        delay(1);
-    }
-    if (i == max) {
-        logln("!!! Iteration limit reached.");
-    }
+    int response = parse_response(client);
     client.stop();
-    return a;
+    return response;
 }
 
 bool (*states[8])();
