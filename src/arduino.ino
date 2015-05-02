@@ -20,7 +20,7 @@ RedFlyClient client(server, 80);
 
 bool rf_init() {
     int baud = 9600;
-    uint8_t pwr = MED_POWER;
+    uint8_t pwr = LOW_POWER;
     log("RedFly.init(");
     log(String(baud));
     log(", ");
@@ -151,6 +151,8 @@ void get_request_data(char* resultChar) {
 int read_response() {
     logln("read_response");
     int response = parse_response(client);
+    log("response: ");
+    logln(String(response));
     client.stop();
     return response;
 }
