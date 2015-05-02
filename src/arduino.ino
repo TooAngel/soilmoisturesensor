@@ -19,7 +19,7 @@ int state = 0;
 RedFlyClient client(server, 80);
 
 bool rf_init() {
-    int baud = 19200;
+    int baud = 9600;
     uint8_t pwr = MED_POWER;
     log("RedFly.init(");
     log(String(baud));
@@ -59,7 +59,7 @@ bool rf_begin() {
     uint8_t ret;
     ret = RedFly.begin();
     if (ret) {
-        log("BEGIN ERROR");
+        log("ERROR BEGIN: ");
         log(String(ret));
         logln("");
         RedFly.disconnect();

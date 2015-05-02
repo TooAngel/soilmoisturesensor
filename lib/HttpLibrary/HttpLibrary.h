@@ -4,7 +4,8 @@ typedef enum {
         ReadProtocol,
         ReadStatusCode,
         ReadStatusMessage,
-        ReadHeader
+        ReadHeader,
+        ReadData
 } ParseState;
 
 int parse_response(RedFlyClient client);

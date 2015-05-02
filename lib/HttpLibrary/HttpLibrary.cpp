@@ -18,67 +18,94 @@ int receive_data(RedFlyClient client) {
     int statusMessagePos = 0;
     char statusMessage[20];
     int statusCode = 0;
+    char headerline[100];
+    int headerlinePos = 0;
+    const char* contentlengthPrefix = "Content-Length:";
+    const char* contentlengthPtr = contentlengthPrefix;
+    bool contentlengthcheck = false;
 
     do {
         c = client.read();
         if (c != -1) {
-            switch(state) {
-                case ReadProtocol:
-                    if ( (*protocolPtr == '*') || (*protocolPtr == c) ) {
-                        protocol[protocolPos++] = c;
-                        protocolPtr++;
-                        if (*protocolPtr == '\0') {
-                            state = ReadStatusCode;
-                            protocol[protocolPos++] = '\0';
-                            log("Protocol: ");
-                            log(String(protocol));
-                            logln("");
-                        }
-                    }
-                    break;
-                case ReadStatusCode:
-                    if (isdigit(c)) {
-                        statusCode = statusCode * 10 + (c - '0');
-                    } else {
-                        state = ReadStatusMessage;
-                        log("Status: ");
-                        log(String(statusCode));
+            switch (state) {
+            case ReadProtocol:
+                if ((*protocolPtr == '*') || (*protocolPtr == c)) {
+                    protocol[protocolPos++] = c;
+                    protocolPtr++;
+                    if (*protocolPtr == '\0') {
+                        state = ReadStatusCode;
+                        protocol[protocolPos++] = '\0';
+                        log("Protocol: ");
+                        log(String(protocol));
                         logln("");
                     }
+                }
+                break;
+            case ReadStatusCode:
+                if (isdigit(c)) {
+                    statusCode = statusCode * 10 + (c - '0');
+                } else {
+                    state = ReadStatusMessage;
+                    log("Status: ");
+                    log(String(statusCode));
+                    logln("");
+                }
+                break;
+            case ReadStatusMessage:
+                if (c == '\n') {
+                    statusMessage[statusMessagePos++] = '\0';
+                    log("Message: ");
+                    log(String(statusMessage));
+                    logln("");
+                    state = ReadHeader;
                     break;
-                case ReadStatusMessage:
-                    if (c == '\n') {
-                        statusMessage[statusMessagePos++] = '\0';
-                        log("Message: ");
-                        log(String(statusMessage));
-                        logln("");
-                        state = ReadHeader;
+                }
+                statusMessage[statusMessagePos++] = c;
+                break;
+            case ReadHeader:
+//                logln(String(c));
+                if (c == '\n') {
+                    logln(String(headerlinePos));
+                    if (headerlinePos == 1) {
+                        logln("Emptylinefound");
+                        state = ReadData;
                         break;
                     }
-                    statusMessage[statusMessagePos++] = c;
+                    headerline[headerlinePos++] = '\0';
+                    log("Header line: ");
+                    log(String(headerline));
+                    logln("");
+                    headerlinePos = 0;
                     break;
+                }
+
+                if (*contentlengthPtr == c) {
+                    //TODO check if the field matches contentlength, store value and use for reading data
+                }
+
+                headerline[headerlinePos++] = c;
+                break;
+            case ReadData:
+                logln(String(c));
             }
 
-            if (len < (sizeof(data) - 1)) {
-                data[len++] = c;
-            } else {
-                log("len < sizeof(data) -1: ");
-                log (String(len));log
-                (" < ");
-                log(String(sizeof(data) - 1));
-                logln("");
-                c = -1;
-            }
+//            if (len < (sizeof(data) - 1)) {
+//                data[len++] = c;
+//            } else {
+//                log("len < sizeof(data) -1: ");
+//                log(String(len));
+//                log(" < ");
+//                log(String(sizeof(data) - 1));
+//                logln("");
+//                c = -1;
+//            }
         } else {
             logln("Got -1");
         }
     } while (c != -1);
-    logln (String(data));data
-    [len] = 0;
-    response = data[168] - '0';
-
-//    log(String(statusMessage));
-//    logln("");
+//    logln(String(data));
+//    data[len] = 0;
+//    response = data[168] - '0';
 
     return response;
 }
@@ -86,7 +113,7 @@ int receive_data(RedFlyClient client) {
 int parse_response(RedFlyClient client) {
     int response = 0;
     int i = 0;
-    int max = 10000;
+    int max = 1000;
 
     for (i = 0; i < max; i++) {
         log(".");
