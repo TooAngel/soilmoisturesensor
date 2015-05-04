@@ -151,7 +151,7 @@ void get_request_data(char* resultChar) {
 int read_response() {
     logln("read_response");
     int response = parse_response(client);
-    log("response: ");
+    logln("response: ");
     logln(String(response));
     client.stop();
     return response;

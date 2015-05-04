@@ -65,8 +65,6 @@ String receive_data(RedFlyClient client) {
                 break;
             case ReadHeader:
                 if (c == '\n') {
-                    logln("Newlinefound");
-                    logln(String(headerlinePos));
                     if (headerlinePos == 1) {
                         logln("Empty line found - finishing headers");
                         state = ReadData;
