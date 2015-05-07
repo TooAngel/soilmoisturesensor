@@ -14,7 +14,7 @@ int port = 80;
 int sensorPin = A0;
 int sensorValue = 0;
 
-int state = 0;
+int connectionState = 0;
 int wait = 50000;
 uint8_t ret;
 char resultChar[255];
@@ -22,7 +22,7 @@ char resultChar[255];
 int baud = 9600;
 uint8_t pwr = LOW_POWER;
 
-RedFlyClient client(server, 80);
+RedFlyClient client;
 
 
 bool rf_init() {
@@ -93,7 +93,7 @@ bool connect() {
 }
 
 bool send_request() {
-    logln("client.write:");
+    logln("client.write");
     get_request_data(NAME, HOSTNAME, sensorValue, resultChar);
     client.write(resultChar);
     return true;
@@ -125,10 +125,10 @@ void setup() {
 
 void loop() {
     int motorTime = 0;
-    for (int i = state; i < 8; i++) {
+    for (int i = connectionState; i < 8; i++) {
         if (!(*states[i])()) {
             logln("failed");
-            state = max(0, state - 1);
+            connectionState = max(0, connectionState - 1);
             delay(1000);
             return;
         }
@@ -144,7 +144,7 @@ void loop() {
         digitalWrite(12, LOW);
     }
 
-    state = 5;
+    connectionState = 5;
     logln("wait");
     delay(wait - (motorTime * 1000));
 }

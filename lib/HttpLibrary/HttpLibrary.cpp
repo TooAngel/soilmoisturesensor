@@ -2,102 +2,128 @@
 #include <Arduino.h>
 #include <Output.h>
 
+char data[1024];
+unsigned int dataPos = 0;
+int return_int = 0;
+
+char c = '\0';
+ParseState parseState = ReadProtocol;
+
+unsigned int protocolPos = 0;
+char protocol[10];
+const char* protocolPrefix = "HTTP/*.* ";
+const char* protocolPtr = protocolPrefix;
+unsigned int statusMessagePos = 0;
+char statusMessage[20];
+int statusCode = 0;
+char headerline[100];
+int headerlinePos = 0;
+int contentLength = 0;
+
+
+void readProtocol() {
+    if ((*protocolPtr == '*') || (*protocolPtr == c)) {
+        protocol[protocolPos++] = c;
+        protocolPtr++;
+        if (*protocolPtr == '\0') {
+            parseState = ReadStatusCode;
+            protocol[protocolPos++] = '\0';
+            logBegin("Protocol", String(protocol));
+        }
+    }
+}
+
+int readStatusCode() {
+    if (isdigit(c)) {
+        statusCode = statusCode * 10 + (c - '0');
+    } else {
+        if (statusCode != 200) {
+            logBegin("Status code wrong", String(statusCode));
+            return 1;
+        }
+        parseState = ReadStatusMessage;
+        logBegin("Status", String(statusCode));
+    }
+    return 0;
+}
+
+void readStatusMessage() {
+    if (c == '\n') {
+        statusMessage[statusMessagePos++] = '\0';
+        logBegin("Message", String(statusMessage));
+        parseState = ReadHeader;
+        return;
+    }
+    statusMessage[statusMessagePos++] = c;
+
+}
+
+void readHeader() {
+    if (c == '\n') {
+        if (headerlinePos == 1) {
+            logln("Empty line found - finishing headers");
+            parseState = ReadData;
+            return;
+        }
+        headerlinePos = 0;
+        // Properly readout content-length
+        contentLength = 2;
+        return;
+    }
+
+    headerline[headerlinePos++] = c;
+}
+
+int readData() {
+    logBegin("ReadData", String(c));
+    return_int = c - '0';
+//    logln(String(return_int));
+    return return_int;
+    if (contentLength > 1) {
+        logln(String(c));
+        data[dataPos++] = c;
+        contentLength--;
+    } else {
+        data[dataPos++] = '\0';
+        parseState = Done;
+    }
+}
+
 int receive_data(RedFlyClient client) {
-    char data[1024];
-    unsigned int dataPos = 0;
-    int return_int = 0;
-
-    char c = '\0';
-    ParseState state = ReadProtocol;
-
-    unsigned int protocolPos = 0;
-    char protocol[10];
-    const char* protocolPrefix = "HTTP/*.* ";
-    const char* protocolPtr = protocolPrefix;
-    unsigned int statusMessagePos = 0;
-    char statusMessage[20];
-    int statusCode = 0;
-    char headerline[100];
-    int headerlinePos = 0;
-    int contentLength = 0;
+    dataPos = 0;
+    return_int = 0;
+    c = '\0';
+    parseState = ReadProtocol;
+    protocolPos = 0;
+    protocolPtr = protocolPrefix;
+    statusMessagePos = 0;
+    statusCode = 0;
+    headerlinePos = 0;
+    contentLength = 0;
 
     do {
         c = client.read();
         if (c != -1) {
-            switch (state) {
+            switch (parseState) {
             case ReadProtocol:
-                if ((*protocolPtr == '*') || (*protocolPtr == c)) {
-                    protocol[protocolPos++] = c;
-                    protocolPtr++;
-                    if (*protocolPtr == '\0') {
-                        state = ReadStatusCode;
-                        protocol[protocolPos++] = '\0';
-                        log("Protocol: ");
-                        log(String(protocol));
-                        logln("");
-                    }
-                }
+                readProtocol();
                 break;
             case ReadStatusCode:
-                if (isdigit(c)) {
-                    statusCode = statusCode * 10 + (c - '0');
-                } else {
-                    if (statusCode != 200) {
-                        log("Status code wrong: ");
-                        logln(String(statusCode));
-                        return 0;
-                    }
-                    state = ReadStatusMessage;
-                    log("Status: ");
-                    log(String(statusCode));
-                    logln("");
+                if (readStatusCode()) {
+                    return 0;
                 }
                 break;
             case ReadStatusMessage:
-                if (c == '\n') {
-                    statusMessage[statusMessagePos++] = '\0';
-                    log("Message: ");
-                    log(String(statusMessage));
-                    logln("");
-                    state = ReadHeader;
-                    break;
-                }
-                statusMessage[statusMessagePos++] = c;
+                readStatusMessage();
                 break;
             case ReadHeader:
-                if (c == '\n') {
-                    if (headerlinePos == 1) {
-                        logln("Empty line found - finishing headers");
-                        state = ReadData;
-                        break;
-                    }
-                    headerlinePos = 0;
-                    // Properly readout content-length
-                    contentLength = 2;
-                    break;
-                }
-
-                headerline[headerlinePos++] = c;
+                readHeader();
                 break;
             case ReadData:
-                log("ReadData: ");
-                logln(String(c));
-                return_int = c - '0';
-//                logln(String(return_int));
-                return return_int;
-                if (contentLength > 1) {
-                    logln(String(c));
-                    data[dataPos++] = c;
-                    contentLength--;
-                } else {
-                    data[dataPos++] = '\0';
-                    state = Done;
-                }
+                return readData();
                 break;
             case Done:
                 logln("Done");
-//                logln(String(data));
-//                return String(data);
                 return 0;
             }
         } else {
@@ -116,6 +142,7 @@ int parse_response(RedFlyClient client) {
     for (i = 0; i < max; i++) {
         log(".");
         if (client.available()) {
+            logln("");
             logln("client.available");
             response_value = receive_data(client);
             logln("Data received");
