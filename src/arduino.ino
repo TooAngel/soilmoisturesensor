@@ -10,29 +10,31 @@
 
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
+
 int sensorPin = A0;
 int sensorValue = 0;
 
-bool connected = false;
 int state = 0;
 int wait = 50000;
+uint8_t ret;
+char resultChar[255];
+
+int baud = 9600;
+uint8_t pwr = LOW_POWER;
+
 
 RedFlyClient client(server, 80);
 
+
 bool rf_init() {
-    int baud = 9600;
-    uint8_t pwr = LOW_POWER;
     log("RedFly.init(");
     log(String(baud));
     log(", ");
     log(String(pwr));
     logln(")");
-    uint8_t ret;
     ret = RedFly.init(baud, pwr);
     if (ret) {
-        log("INIT ERROR: ");
-        log(String(ret));
-        logln("");
+        logError("init", ret);
         return false;
     }
     return true;
@@ -42,13 +44,10 @@ bool rf_join() {
     log("RedFly.join: ");
     log(String(BSSID));
     logln("");
-    uint8_t ret;
     RedFly.scan();
     ret = RedFly.join(BSSID, PASSWORD);
     if (ret) {
-        log("JOIN ERROR: ");
-        log(String(ret));
-        logln("");
+        logError("join", ret);
         RedFly.disconnect();
         return false;
     }
@@ -57,14 +56,10 @@ bool rf_join() {
 
 bool rf_begin() {
     logln("RedFly.begin");
-    uint8_t ret;
     ret = RedFly.begin();
     if (ret) {
-        log("ERROR BEGIN: ");
-        log(String(ret));
-        logln("");
+        logError("begin", ret);
         RedFly.disconnect();
-        connected = false;
         return false;
     }
     return true;
@@ -75,26 +70,16 @@ bool get_ip() {
     log(String(HOSTNAME));
     logln(")");
     char* hostname_char;
-    if (RedFly.getip(HOSTNAME, server)) {
-        logln("DNS ERR");
+    ret = RedFly.getip(HOSTNAME, server);
+    if (ret) {
+        logError("get_ip", ret);
         return false;
     }
     return true;
 }
 
 bool rf_set_client() {
-    int port = 80;
-    log("RedFlyClient(");
-    log(String(server[0]));
-    log(".");
-    log(String(server[1]));
-    log(".");
-    log(String(server[2]));
-    log(".");
-    log(String(server[3]));
-    log(", ");
-    log(String(port));
-    logln(")");
+    logServerAndPort("RedFlyClient", server, port);
     client = RedFlyClient(server, port);
     return true;
 }
@@ -107,45 +92,21 @@ bool read_sensor() {
 }
 
 bool connect() {
-    log("Connect to: ");
-    log(String(server[0]));
-    log(".");
-    log(String(server[1]));
-    log(".");
-    log(String(server[2]));
-    log(".");
-    log(String(server[3]));
-    log(":");
-    log(String(port));
-    logln("");
-//    logln("connect" + String(server));
-    if (client.connect(server, port)) {
+    logServerAndPort("Connect", server, port);
+    ret = client.connect(server, port);
+    if (ret) {
         return true;
     } else {
-        logln("CLIENT ERR: ");
+        logError("connect", ret);
         return false;
     }
 }
 
 bool send_request() {
     logln("client.write:");
-    char resultChar[255];
-    get_request_data(resultChar);
-    log(String(resultChar));
-    logln("");
+    get_request_data(NAME, HOSTNAME, sensorValue, resultChar);
     client.write(resultChar);
     return true;
-}
-
-void get_request_data(char* resultChar) {
-    String data = "POST /sensors/" NAME "/points/ HTTP/1.1\r\nHost:";
-    data += HOSTNAME;
-    data += "\r\nContent-Type: application/json";
-    data += "\r\nContent-length: 16\r\n\r\n{\"measure\": ";
-    data += sensorValue;
-    data += "}\r\n";
-
-    data.toCharArray(resultChar, 255);
 }
 
 int read_response() {

@@ -10,3 +10,4 @@ typedef enum {
 } ParseState;
 
 int parse_response(RedFlyClient client);
+void get_request_data(char* name, char* hostname, int sensorValue, char* resultChar);

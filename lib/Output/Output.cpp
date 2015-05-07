@@ -11,3 +11,26 @@ void logln(String message) {
         Serial.println(message);
     }
 }
+
+void logError(String message, uint8_t ret) {
+    log("ERROR ");
+    log(message);
+    log(": ");
+    log(String(ret));
+    logln("");
+}
+
+void logServerAndPort(String command, byte server[], int port) {
+    log(command);
+    log(" (");
+    log(String(server[0]));
+    log(".");
+    log(String(server[1]));
+    log(".");
+    log(String(server[2]));
+    log(".");
+    log(String(server[3]));
+    log(", ");
+    log(String(port));
+    logln(")");
+}
