@@ -81,15 +81,18 @@ String receive_data(RedFlyClient client) {
             case ReadData:
                 log("ReadData: ");
                 logln(String(contentLength));
-                if (contentLength > 0) {
+                if (contentLength > 1) {
                     logln(String(c));
                     data[dataPos++] = c;
+                    contentLength--;
                 } else {
                     data[dataPos++] = '\0';
                     state = Done;
                 }
+                break;
             case Done:
                 logln("Done");
+//                logln(String(data));
                 return String(data);
             }
         } else {
@@ -100,7 +103,7 @@ String receive_data(RedFlyClient client) {
 }
 
 int parse_response(RedFlyClient client) {
-    String response = 0;
+    String response = "0";
     int i = 0;
     int max = 1000;
 
@@ -109,6 +112,7 @@ int parse_response(RedFlyClient client) {
         if (client.available()) {
             logln("client.available");
             response = receive_data(client);
+            logln("Data received");
             break;
         }
 
@@ -121,5 +125,10 @@ int parse_response(RedFlyClient client) {
     if (i == max) {
         logln("!!! Iteration limit reached.");
     }
-    return response.toInt();
+    log("Response string: ");
+    logln(response);
+    int response_value = response.toInt();
+//    logln("Response int: ");
+//    logln(String(response_value));
+    return response_value;
 }

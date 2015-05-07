@@ -73,7 +73,6 @@ bool get_ip() {
     log("RedFly.getip(");
     log(String(HOSTNAME));
     logln(")");
-    return true;
     char* hostname_char;
     if (RedFly.getip(HOSTNAME, server)) {
         logln("DNS ERR");
