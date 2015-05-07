@@ -28,7 +28,7 @@ void readProtocol() {
         if (*protocolPtr == '\0') {
             parseState = ReadStatusCode;
             protocol[protocolPos++] = '\0';
-            logBegin("Protocol", String(protocol));
+//            logBegin("Protocol", String(protocol));
         }
     }
 }
@@ -50,7 +50,7 @@ int readStatusCode() {
 void readStatusMessage() {
     if (c == '\n') {
         statusMessage[statusMessagePos++] = '\0';
-        logBegin("Message", String(statusMessage));
+//        logBegin("Message", String(statusMessage));
         parseState = ReadHeader;
         return;
     }
@@ -62,12 +62,12 @@ void readHeader() {
     if (c == '\n') {
         if (headerlinePos == 1) {
             logln("Empty line found - finishing headers");
+            // Properly readout content-length
+            contentLength = 2;
             parseState = ReadData;
             return;
         }
         headerlinePos = 0;
-        // Properly readout content-length
-        contentLength = 2;
         return;
     }
 
@@ -77,16 +77,7 @@ void readHeader() {
 int readData() {
     logBegin("ReadData", String(c));
     return_int = c - '0';
-//    logln(String(return_int));
     return return_int;
-    if (contentLength > 1) {
-        logln(String(c));
-        data[dataPos++] = c;
-        contentLength--;
-    } else {
-        data[dataPos++] = '\0';
-        parseState = Done;
-    }
 }
 
 int receive_data(RedFlyClient client) {
@@ -122,12 +113,9 @@ int receive_data(RedFlyClient client) {
             case ReadData:
                 return readData();
                 break;
-            case Done:
-                logln("Done");
-                return 0;
             }
         } else {
-            logln("Got -1");
+            logError("client.read", c);
         }
     } while (c != -1);
     return 0;
