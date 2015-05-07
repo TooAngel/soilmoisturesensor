@@ -125,6 +125,7 @@ void setup() {
 
 void loop() {
     int motorTime = 0;
+    int wait_now = 0;
     for (int i = connectionState; i < 8; i++) {
         if (!(*states[i])()) {
             logln("failed");
@@ -137,14 +138,15 @@ void loop() {
     motorTime = read_response();
     client.stop();
     if (motorTime > 0) {
-        logln("Start motor");
-        logln(String(motorTime));
+        logBegin("Start motor", String(motorTime));
         digitalWrite(12, HIGH);
         delay(motorTime * 1000);
         digitalWrite(12, LOW);
     }
 
     connectionState = 5;
-    logln("wait");
-    delay(wait - (motorTime * 1000));
+    
+    wait_now = wait - (motorTime * 1000);
+    logBegin("wait", String(wait_now));
+    delay(wait_now);
 }

@@ -146,7 +146,6 @@ int parse_response(RedFlyClient client) {
     return 0;
 }
 
-
 void get_request_data(char* name, char* hostname, int sensorValue, char* resultChar) {
     String data = "POST /sensors/";
     data += name;
