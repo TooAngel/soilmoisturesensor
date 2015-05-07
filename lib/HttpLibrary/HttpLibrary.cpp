@@ -2,9 +2,10 @@
 #include <Arduino.h>
 #include <Output.h>
 
-String receive_data(RedFlyClient client) {
+int receive_data(RedFlyClient client) {
     char data[1024];
     unsigned int dataPos = 0;
+    int return_int = 0;
 
     char c = '\0';
     ParseState state = ReadProtocol;
@@ -44,7 +45,7 @@ String receive_data(RedFlyClient client) {
                     if (statusCode != 200) {
                         log("Status code wrong: ");
                         logln(String(statusCode));
-                        return String("0");
+                        return 0;
                     }
                     state = ReadStatusMessage;
                     log("Status: ");
@@ -80,7 +81,10 @@ String receive_data(RedFlyClient client) {
                 break;
             case ReadData:
                 log("ReadData: ");
-                logln(String(contentLength));
+                logln(String(c));
+                return_int = c - '0';
+//                logln(String(return_int));
+                return return_int;
                 if (contentLength > 1) {
                     logln(String(c));
                     data[dataPos++] = c;
@@ -93,17 +97,19 @@ String receive_data(RedFlyClient client) {
             case Done:
                 logln("Done");
 //                logln(String(data));
-                return String(data);
+//                return String(data);
+                return 0;
             }
         } else {
             logln("Got -1");
         }
     } while (c != -1);
-    return String(data);
+    return 0;
 }
 
 int parse_response(RedFlyClient client) {
-    String response = "0";
+//    String response = "0";
+    int response_value = 0;
     int i = 0;
     int max = 1000;
 
@@ -111,7 +117,7 @@ int parse_response(RedFlyClient client) {
         log(".");
         if (client.available()) {
             logln("client.available");
-            response = receive_data(client);
+            response_value = receive_data(client);
             logln("Data received");
             break;
         }
@@ -125,9 +131,9 @@ int parse_response(RedFlyClient client) {
     if (i == max) {
         logln("!!! Iteration limit reached.");
     }
-    log("Response string: ");
-    logln(response);
-    int response_value = response.toInt();
+//    log("Response string: ");
+//    logln(response);
+//    int response_value = response.toInt();
 //    logln("Response int: ");
 //    logln(String(response_value));
     return response_value;
