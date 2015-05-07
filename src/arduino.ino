@@ -22,16 +22,11 @@ char resultChar[255];
 int baud = 9600;
 uint8_t pwr = LOW_POWER;
 
-
 RedFlyClient client(server, 80);
 
 
 bool rf_init() {
-    log("RedFly.init(");
-    log(String(baud));
-    log(", ");
-    log(String(pwr));
-    logln(")");
+    logBegin("RedFly.init", String(baud), String(pwr));
     ret = RedFly.init(baud, pwr);
     if (ret) {
         logError("init", ret);
@@ -41,9 +36,7 @@ bool rf_init() {
 }
 
 bool rf_join() {
-    log("RedFly.join: ");
-    log(String(BSSID));
-    logln("");
+    logBegin("RedFly.join", String(BSSID));
     RedFly.scan();
     ret = RedFly.join(BSSID, PASSWORD);
     if (ret) {
@@ -66,10 +59,7 @@ bool rf_begin() {
 }
 
 bool get_ip() {
-    log("RedFly.getip(");
-    log(String(HOSTNAME));
-    logln(")");
-    char* hostname_char;
+    logBegin("RedFly.getip", String(HOSTNAME));
     ret = RedFly.getip(HOSTNAME, server);
     if (ret) {
         logError("get_ip", ret);

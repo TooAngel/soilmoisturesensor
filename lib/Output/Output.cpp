@@ -20,6 +20,20 @@ void logError(String message, uint8_t ret) {
     logln("");
 }
 
+void logBegin(String one, String two) {
+    log(one);
+    log(": ");
+    logln(two);
+}
+
+void logBegin(String one, String two, String three) {
+    log(one);
+    log(": ");
+    log(two);
+    log(", ");
+    logln(three);
+}
+
 void logServerAndPort(String command, byte server[], int port) {
     log(command);
     log(" (");
