@@ -15,6 +15,7 @@ int sensorValue = 0;
 
 bool connected = false;
 int state = 0;
+int wait = 50000;
 
 RedFlyClient client(server, 80);
 
@@ -183,6 +184,7 @@ void loop() {
     }
 
     motorTime = read_response();
+    client.stop();
     if (motorTime > 0) {
         logln("Start motor");
         logln(String(motorTime));
@@ -193,5 +195,5 @@ void loop() {
 
     state = 5;
     logln("wait");
-    delay(50000 - (motorTime * 1000));
+    delay(wait - (motorTime * 1000));
 }
