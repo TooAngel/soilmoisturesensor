@@ -134,36 +134,28 @@ int receive_data(RedFlyClient client) {
 }
 
 int parse_response(RedFlyClient client) {
-//    String response = "0";
-    int response_value = 0;
     int i = 0;
     int max = 1000;
+    int wait = 100;
 
     for (i = 0; i < max; i++) {
         log(".");
         if (client.available()) {
             logln("");
             logln("client.available");
-            response_value = receive_data(client);
-            logln("Data received");
-            break;
+            return receive_data(client);
         }
 
         if (!client.connected()) {
-            logln("client.disconnected");
-            break;
+            logln("");
+            logError("client.disconnected", 0);
+            return 0;
         }
-        delay(10);
+        delay(wait);
     }
-    if (i == max) {
-        logln("!!! Iteration limit reached.");
-    }
-//    log("Response string: ");
-//    logln(response);
-//    int response_value = response.toInt();
-//    logln("Response int: ");
-//    logln(String(response_value));
-    return response_value;
+    logln("");
+    logError("Iteration limit reached", 0);
+    return 0;
 }
 
 
