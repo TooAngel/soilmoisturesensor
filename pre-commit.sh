@@ -1,4 +1,4 @@
+#!/bin/bash
 set -eo pipefail
 
-cpplint --extensions=ino src/* lib/Config/* lib/HttpLibrary/* lib/Output/*
-
+cpplint --filter=-build/include_what_you_use --extensions=ino,cpp,h src/* lib/Config/* lib/HttpLibrary/* lib/Output/*
