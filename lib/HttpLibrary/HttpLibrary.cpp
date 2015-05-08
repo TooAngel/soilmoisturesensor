@@ -77,7 +77,7 @@ void readHeader() {
 int readData() {
     logBegin("ReadData", String(c));
     return_int = c - '0';
-    return return_int;
+    parseState = Done;
 }
 
 int receive_data(RedFlyClient client) {
@@ -111,20 +111,23 @@ int receive_data(RedFlyClient client) {
                 readHeader();
                 break;
             case ReadData:
-                return readData();
+                readData();
+                break;
+            case Done:
+                logln("Done");
                 break;
             }
         } else {
             logError("client.read", c);
         }
     } while (c != -1);
-    return 0;
+    return return_int;
 }
 
 int parse_response(RedFlyClient client) {
     int i = 0;
     int max = 1000;
-    int wait = 100;
+    int wait_for_response = 100;
 
     for (i = 0; i < max; i++) {
         log(".");
@@ -139,7 +142,7 @@ int parse_response(RedFlyClient client) {
             logError("client.disconnected", 0);
             return 0;
         }
-        delay(wait);
+        delay(wait_for_response);
     }
     logln("");
     logError("Iteration limit reached", 0);

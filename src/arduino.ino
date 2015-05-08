@@ -14,13 +14,18 @@ int port = 80;
 int sensorPin = A0;
 int sensorValue = 0;
 
+int motorPin = 12;
+int ledPin = 13;
+
 int connectionState = 0;
-int wait = 50000;
 uint8_t ret;
 char resultChar[255];
 
 int baud = 9600;
 uint8_t pwr = LOW_POWER;
+
+long previousMillis = 0;
+long interval = 60000;
 
 RedFlyClient client;
 
@@ -102,7 +107,7 @@ bool send_request() {
 int read_response() {
     logln("read_response");
     int response = parse_response(client);
-    logln("response: ");
+    log("response: ");
     logln(String(response));
     client.stop();
     return response;
@@ -123,12 +128,12 @@ void setup() {
     states[7] = send_request;
 }
 
-void loop() {
+void run() {
     int motorTime = 0;
-    int wait_now = 0;
+
     for (int i = connectionState; i < 8; i++) {
         if (!(*states[i])()) {
-            logln("failed");
+            logError("Execution failed", i);
             connectionState = max(0, connectionState - 1);
             delay(1000);
             return;
@@ -139,14 +144,23 @@ void loop() {
     client.stop();
     if (motorTime > 0) {
         logBegin("Start motor", String(motorTime));
-        digitalWrite(12, HIGH);
+        digitalWrite(motorPin, HIGH);
         delay(motorTime * 1000);
-        digitalWrite(12, LOW);
+        digitalWrite(motorPin, LOW);
     }
 
     connectionState = 5;
-    
-    wait_now = wait - (motorTime * 1000);
-    logBegin("wait", String(wait_now));
-    delay(wait_now);
+}
+
+void loop() {
+    unsigned long currentMillis = millis();
+    if(currentMillis - previousMillis > interval) {
+        previousMillis = currentMillis;
+
+        digitalWrite(ledPin, HIGH);
+        delay(1000);
+        digitalWrite(ledPin, LOW);
+
+        run();
+    }
 }
