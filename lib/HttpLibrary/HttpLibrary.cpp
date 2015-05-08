@@ -1,3 +1,7 @@
+/*
+ * Copyright 2015 Tobias Wilken
+ */
+
 #include <HttpLibrary.h>
 #include <Arduino.h>
 #include <Output.h>
@@ -55,7 +59,6 @@ void readStatusMessage() {
         return;
     }
     statusMessage[statusMessagePos++] = c;
-
 }
 
 void readHeader() {
@@ -149,7 +152,8 @@ int parse_response(RedFlyClient client) {
     return 0;
 }
 
-void get_request_data(char* name, char* hostname, int sensorValue, char* resultChar) {
+void get_request_data(char* name,
+        char* hostname, int sensorValue, char* resultChar) {
     String data = "POST /sensors/";
     data += name;
     data += "/points/ HTTP/1.1\r\nHost:";

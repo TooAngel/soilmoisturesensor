@@ -1,3 +1,7 @@
+/*
+ * Copyright 2015 Tobias Wilken
+ */
+
 #include <Arduino.h>
 
 void log(String message) {

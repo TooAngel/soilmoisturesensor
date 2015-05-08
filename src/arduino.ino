@@ -14,18 +14,21 @@ int port = 80;
 int sensorPin = A0;
 int sensorValue = 0;
 
+char resultChar[255];
+
 int motorPin = 12;
 int ledPin = 13;
 
 int connectionState = 0;
 uint8_t ret;
-char resultChar[255];
+
+int motorTime = 0;
 
 int baud = 9600;
 uint8_t pwr = LOW_POWER;
 
-long previousMillis = 0;
-long interval = 60000;
+uint16_t previousMillis = 0;
+uint16_t interval = 60000;
 
 RedFlyClient client;
 
@@ -104,13 +107,38 @@ bool send_request() {
     return true;
 }
 
-int read_response() {
+bool read_response() {
     logln("read_response");
-    int response = parse_response(client);
+    motorTime = parse_response(client);
     log("response: ");
-    logln(String(response));
+    logln(String(motorTime));
     client.stop();
-    return response;
+    return true;
+}
+
+bool start_motor() {
+    logBegin("start_motor", "method");
+    if (motorTime > 0) {
+        logBegin("Start motor", String(motorTime));
+        digitalWrite(motorPin, HIGH);
+        delay(motorTime * 1000);
+        digitalWrite(motorPin, LOW);
+        motorTime = 0;
+    }
+    return true;
+}
+
+bool waiting() {
+    logBegin("waiting", "method");
+    uint16_t currentMillis = millis();
+    if (currentMillis - previousMillis > interval || connectionState != 8) {
+        previousMillis = currentMillis;
+        logln("");
+        logln("Waiting done");
+        connectionState = 5;
+    }
+    log(".");
+    return true;
 }
 
 bool (*states[8])();
@@ -126,12 +154,12 @@ void setup() {
     states[5] = read_sensor;
     states[6] = connect;
     states[7] = send_request;
+    states[8] = read_response;
+    states[9] = start_motor;
 }
 
 void run() {
-    int motorTime = 0;
-
-    for (int i = connectionState; i < 8; i++) {
+    for (int i = connectionState; i < 10; i++) {
         if (!(*states[i])()) {
             logError("Execution failed", i);
             connectionState = max(0, connectionState - 1);
@@ -139,28 +167,9 @@ void run() {
             return;
         }
     }
-
-    motorTime = read_response();
-    client.stop();
-    if (motorTime > 0) {
-        logBegin("Start motor", String(motorTime));
-        digitalWrite(motorPin, HIGH);
-        delay(motorTime * 1000);
-        digitalWrite(motorPin, LOW);
-    }
-
-    connectionState = 5;
+    waiting();
 }
 
 void loop() {
-    unsigned long currentMillis = millis();
-    if(currentMillis - previousMillis > interval) {
-        previousMillis = currentMillis;
-
-        digitalWrite(ledPin, HIGH);
-        delay(1000);
-        digitalWrite(ledPin, LOW);
-
-        run();
-    }
+    run();
 }
