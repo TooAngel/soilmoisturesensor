@@ -118,7 +118,7 @@ int receive_data(RedFlyClient client) {
                 break;
             case Done:
                 logln("Done");
-//                return return_int;
+                return return_int;
                 break;
             }
         } else {
