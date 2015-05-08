@@ -17,7 +17,6 @@ int sensorValue = 0;
 char resultChar[255];
 
 int motorPin = 12;
-int ledPin = 13;
 
 int connectionState = 0;
 uint8_t ret;
@@ -110,8 +109,8 @@ bool send_request() {
 bool read_response() {
     logln("read_response");
     motorTime = parse_response(client);
-    log("response: ");
-    logln(String(motorTime));
+//    log("response: ");
+//    logln(String(motorTime));
     client.stop();
     return true;
 }
