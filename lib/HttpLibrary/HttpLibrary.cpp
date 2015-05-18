@@ -6,7 +6,6 @@
 #include <Arduino.h>
 #include <Output.h>
 
-char data[1024];
 unsigned int dataPos = 0;
 int return_int = 0;
 
@@ -118,7 +117,6 @@ int receive_data(RedFlyClient client) {
                 break;
             case Done:
                 logln("Done");
-                return return_int;
                 break;
             }
         } else {

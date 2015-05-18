@@ -7,6 +7,9 @@
 #include <Config.h>
 #include <HttpLibrary.h>
 #include <Output.h>
+#include <Logging.h>
+
+#define LOGLEVEL LOG_LEVEL_DEBUG
 
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
@@ -33,7 +36,7 @@ RedFlyClient client;
 
 
 bool rf_init() {
-    logBegin("RedFly.init", String(baud), String(pwr));
+    Log.Info("RedFly.init %d %d"CR, baud, pwr);
     ret = RedFly.init(baud, pwr);
     if (ret) {
         logError("init", ret);
@@ -109,9 +112,10 @@ bool send_request() {
 bool read_response() {
     logln("read_response");
     motorTime = parse_response(client);
-//    log("response: ");
-//    logln(String(motorTime));
-    client.stop();
+    log("response: ");
+    logln(String(motorTime));
+//    client.stop();
+    logln("client stopped");
     return true;
 }
 
@@ -143,6 +147,8 @@ bool waiting() {
 bool (*states[8])();
 
 void setup() {
+    Log.Init(LOGLEVEL, 9600L);
+
     pinMode(12, OUTPUT);
     Serial.begin(9600);
     states[0] = rf_init;
@@ -159,8 +165,9 @@ void setup() {
 
 void run() {
     for (int i = connectionState; i < 10; i++) {
+        Log.Debug("Executing connection state: %d"CR, i);
         if (!(*states[i])()) {
-            logError("Execution failed", i);
+            Log.Error("Execution failed %d"CR, i);
             connectionState = max(0, connectionState - 1);
             delay(1000);
             return;

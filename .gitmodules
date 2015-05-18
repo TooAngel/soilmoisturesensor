@@ -1,0 +1,3 @@
+[submodule "lib/Logging"]
+	path = lib/Logging
+	url = https://github.com/mrRobot62/Arduino-logging-library
