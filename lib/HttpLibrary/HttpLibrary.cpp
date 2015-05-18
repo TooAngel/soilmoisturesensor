@@ -4,7 +4,7 @@
 
 #include <HttpLibrary.h>
 #include <Arduino.h>
-#include <Output.h>
+#include <Logging.h>
 
 unsigned int dataPos = 0;
 int return_int = 0;
@@ -31,7 +31,7 @@ void readProtocol() {
         if (*protocolPtr == '\0') {
             parseState = ReadStatusCode;
             protocol[protocolPos++] = '\0';
-//            logBegin("Protocol", String(protocol));
+            Log.Verbose("Protocol %d"CR, protocol);
         }
     }
 }
@@ -41,11 +41,11 @@ int readStatusCode() {
         statusCode = statusCode * 10 + (c - '0');
     } else {
         if (statusCode != 200) {
-            logBegin("Status code wrong", String(statusCode));
+            Log.Error("Status code wrong: %d"CR, statusCode);
             return 1;
         }
         parseState = ReadStatusMessage;
-        logBegin("Status", String(statusCode));
+        Log.Info("Status %d"CR, statusCode);
     }
     return 0;
 }
@@ -53,7 +53,7 @@ int readStatusCode() {
 void readStatusMessage() {
     if (c == '\n') {
         statusMessage[statusMessagePos++] = '\0';
-//        logBegin("Message", String(statusMessage));
+        Log.Verbose("Message %s"CR, statusMessage);
         parseState = ReadHeader;
         return;
     }
@@ -63,7 +63,7 @@ void readStatusMessage() {
 void readHeader() {
     if (c == '\n') {
         if (headerlinePos == 1) {
-            logln("Empty line found - finishing headers");
+            Log.Debug("Empty line found - finishing headers"CR);
             // Properly readout content-length
             contentLength = 2;
             parseState = ReadData;
@@ -77,7 +77,7 @@ void readHeader() {
 }
 
 int readData() {
-    logBegin("ReadData", String(c));
+    Log.Info("ReadData %s"CR, c);
     return_int = c - '0';
     parseState = Done;
 }
@@ -116,11 +116,11 @@ int receive_data(RedFlyClient client) {
                 readData();
                 break;
             case Done:
-                logln("Done");
+                Log.Debug("Done"CR);
                 break;
             }
         } else {
-            logError("client.read", c);
+            Log.Error("client.read %c"CR, c);
         }
     } while (c != -1);
     return return_int;
@@ -132,22 +132,22 @@ int parse_response(RedFlyClient client) {
     int wait_for_response = 100;
 
     for (i = 0; i < max; i++) {
-        log(".");
+        Log.Info(".");
         if (client.available()) {
-            logln("");
-            logln("client.available");
+            Log.Info(""CR);
+            Log.Info("client.available"CR);
             return receive_data(client);
         }
 
         if (!client.connected()) {
-            logln("");
-            logError("client.disconnected", 0);
+            Log.Info(""CR);
+            Log.Error("client.disconnected"CR);
             return 0;
         }
         delay(wait_for_response);
     }
-    logln("");
-    logError("Iteration limit reached", 0);
+    Log.Info(""CR);
+    Log.Error("Iteration limit reached"CR);
     return 0;
 }
 

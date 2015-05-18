@@ -6,7 +6,6 @@
 #include <RedFlyClient.h>
 #include <Config.h>
 #include <HttpLibrary.h>
-#include <Output.h>
 #include <Logging.h>
 
 #define LOGLEVEL LOG_LEVEL_DEBUG
@@ -34,23 +33,22 @@ uint16_t interval = 60000;
 
 RedFlyClient client;
 
-
 bool rf_init() {
     Log.Info("RedFly.init %d %d"CR, baud, pwr);
     ret = RedFly.init(baud, pwr);
     if (ret) {
-        logError("init", ret);
+        Log.Error("ERROR: RedFly.init %d"CR, ret);
         return false;
     }
     return true;
 }
 
 bool rf_join() {
-    logBegin("RedFly.join", String(BSSID));
+    Log.Info("RedFly.join %s", BSSID);
     RedFly.scan();
     ret = RedFly.join(BSSID, PASSWORD);
     if (ret) {
-        logError("join", ret);
+        Log.Error("ERROR: RedFly.join %d"CR, ret);
         RedFly.disconnect();
         return false;
     }
@@ -58,10 +56,10 @@ bool rf_join() {
 }
 
 bool rf_begin() {
-    logln("RedFly.begin");
+    Log.Info("RedFly.begin"CR);
     ret = RedFly.begin();
     if (ret) {
-        logError("begin", ret);
+        Log.Error("ERROR: RedFly.begin %d"CR, ret);
         RedFly.disconnect();
         return false;
     }
@@ -69,60 +67,69 @@ bool rf_begin() {
 }
 
 bool get_ip() {
-    logBegin("RedFly.getip", String(HOSTNAME));
+    Log.Info("RedFly.getip %s"CR, HOSTNAME);
     ret = RedFly.getip(HOSTNAME, server);
     if (ret) {
-        logError("get_ip", ret);
+        Log.Error("ERROR: RedFly.get_ip %d"CR, ret);
         return false;
     }
     return true;
 }
 
 bool rf_set_client() {
-    logServerAndPort("RedFlyClient", server, port);
+    Log.Info("RedFlyClient %d.%d.%d.%d:%d"CR,
+             server[0],
+             server[1],
+             server[2],
+             server[3],
+             port);
     client = RedFlyClient(server, port);
     return true;
 }
 
 bool read_sensor() {
-    log("Read sensor value: ");
+    Log.Info("Read sensor value: ");
     sensorValue = analogRead(sensorPin);
-    logln(String(sensorValue));
+    Log.Info("%d"CR, sensorValue);
     return true;
 }
 
 bool connect() {
-    logServerAndPort("Connect", server, port);
+    Log.Info("Connect(%d.%d.%d.%d:%d)"CR,
+              server[0],
+              server[1],
+              server[2],
+              server[3],
+              port);
     ret = client.connect(server, port);
     if (ret) {
         return true;
     } else {
-        logError("connect", ret);
+        Log.Error("Connect %d"CR, ret);
         return false;
     }
 }
 
 bool send_request() {
-    logln("client.write");
+    Log.Info("client.write"CR);
     get_request_data(NAME, HOSTNAME, sensorValue, resultChar);
     client.write(resultChar);
     return true;
 }
 
 bool read_response() {
-    logln("read_response");
+    Log.Info("read_response"CR);
     motorTime = parse_response(client);
-    log("response: ");
-    logln(String(motorTime));
+    Log.Debug("response: %d"CR, motorTime);
 //    client.stop();
-    logln("client stopped");
+//    Log.Debug("client stopped");
     return true;
 }
 
 bool start_motor() {
-    logBegin("start_motor", "method");
+    Log.Info("start_motor"CR);
     if (motorTime > 0) {
-        logBegin("Start motor", String(motorTime));
+        Log.Info("Start motor %d"CR, motorTime);
         digitalWrite(motorPin, HIGH);
         delay(motorTime * 1000);
         digitalWrite(motorPin, LOW);
@@ -132,15 +139,14 @@ bool start_motor() {
 }
 
 bool waiting() {
-    logBegin("waiting", "method");
+    Log.Info("waiting"CR);
     uint16_t currentMillis = millis();
     if (currentMillis - previousMillis > interval || connectionState != 8) {
         previousMillis = currentMillis;
-        logln("");
-        logln("Waiting done");
+        Log.Debug("Waiting done"CR);
         connectionState = 5;
     }
-    log(".");
+    Log.Info(".");
     return true;
 }
 
