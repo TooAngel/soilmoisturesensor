@@ -134,7 +134,7 @@ int read_response() {
 	char data[1024];
 	data[len] = 0;
 	int i = 0;
-	int max = 1000;
+	int max = 10000;
 	for (i=0; i<max; i++) {
 		if (client.available()) {
 		    Log.Info("client.available"CR);
@@ -153,7 +153,7 @@ int read_response() {
 			Log.Info("client.disconnected"CR);
 			break;
 		}
-		delay(1);
+		delay(10);
 	}
 	if (i == max) {
 		Log.Info("!!! Iteration limit reached."CR);
