@@ -21,11 +21,12 @@ uint8_t pwr = LOW_POWER;
 bool connected = false;
 int state = 0;
 
+uint8_t ret;
+
 RedFlyClient client(server, 80);
 
 bool rf_init() {
     Log.Info("RedFly.init %d %d"CR, baud, pwr);
-    uint8_t ret;
     ret = RedFly.init(baud, pwr);
     if (ret) {
         Log.Error("RedFly.init %d"CR, ret);
@@ -36,7 +37,6 @@ bool rf_init() {
 
 bool rf_join() {
     Log.Info("RedFly.join %s"CR, BSSID);
-    uint8_t ret;
     RedFly.scan();
     ret = RedFly.join(BSSID, PASSWORD);
     if (ret) {
@@ -49,7 +49,6 @@ bool rf_join() {
 
 bool rf_begin() {
     Log.Info("RedFly.begin"CR);
-    uint8_t ret;
     ret = RedFly.begin();
     if (ret) {
         Log.Error("RedFly.begin %d"CR, ret);
@@ -63,7 +62,6 @@ bool rf_begin() {
 bool get_ip() {
     Log.Info("RedFly.getip %s"CR, HOSTNAME);
     char* hostname_char;
-    uint8_t ret;
     ret = RedFly.getip(HOSTNAME, server);
     if (ret) {
         Log.Error("RedFly.get_ip %d"CR, ret);
@@ -97,7 +95,6 @@ bool connect() {
               server[2],
               server[3],
               port);
-    uint8_t ret;
     ret = client.connect(server, port);
     if (ret) {
         return true;
