@@ -48,8 +48,7 @@ void get_request_data(char* name, char* hostname, int sensorValue,
     data += name;
     data += "/points/ HTTP/1.1\r\nHost:";
     data += hostname;
-    data +=
-            "\r\nContent-Type: application/json";
+    data += "\r\nContent-Type: application/json";
     data += "\r\nContent-length: 16\r\n\r\n{\"measure\": ";
     data += sensorValue;
     data += "}\r\n";

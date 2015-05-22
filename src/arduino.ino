@@ -12,18 +12,19 @@
 
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
+
 int sensorPin = A0;
 int sensorValue = 0;
+
+int motorPin = 12;
+
+int connectionState = 0;
+uint8_t ret;
 
 int baud = 9600;
 uint8_t pwr = LOW_POWER;
 
-bool connected = false;
-int state = 0;
-
-uint8_t ret;
-
-RedFlyClient client(server, 80);
+RedFlyClient client;
 
 bool rf_init() {
     Log.Info("RedFly.init %d %d"CR, baud, pwr);
@@ -53,7 +54,6 @@ bool rf_begin() {
     if (ret) {
         Log.Error("RedFly.begin %d"CR, ret);
         RedFly.disconnect();
-        connected = false;
         return false;
     }
     return true;
@@ -61,7 +61,6 @@ bool rf_begin() {
 
 bool get_ip() {
     Log.Info("RedFly.getip %s"CR, HOSTNAME);
-    char* hostname_char;
     ret = RedFly.getip(HOSTNAME, server);
     if (ret) {
         Log.Error("RedFly.get_ip %d"CR, ret);
@@ -77,7 +76,7 @@ bool rf_set_client() {
              server[2],
              server[3],
              port);
-    client = RedFlyClient(server, 80);
+    client = RedFlyClient(server, port);
     return true;
 }
 
@@ -119,29 +118,29 @@ int read_response() {
     return parse_response(client);
 }
 
-bool (*states[8])();
+bool (*connectionStates[8])();
 
 void setup() {
     Log.Init(LOGLEVEL, 9600L);
 
-    pinMode(12, OUTPUT);
+    pinMode(motorPin, OUTPUT);
     Serial.begin(9600);
-    states[0] = rf_init;
-    states[1] = rf_join;
-    states[2] = rf_begin;
-    states[3] = get_ip;
-    states[4] = rf_set_client;
-    states[5] = read_sensor;
-    states[6] = connect;
-    states[7] = send_request;
+    connectionStates[0] = rf_init;
+    connectionStates[1] = rf_join;
+    connectionStates[2] = rf_begin;
+    connectionStates[3] = get_ip;
+    connectionStates[4] = rf_set_client;
+    connectionStates[5] = read_sensor;
+    connectionStates[6] = connect;
+    connectionStates[7] = send_request;
 }
 
 void loop() {
     int motorTime = 0;
-    for (int i = state; i < 8; i++) {
-        if (!(*states[i])()) {
+    for (int i = connectionState; i < 8; i++) {
+        if (!(*connectionStates[i])()) {
             Log.Error("Execution failed %d"CR, i);
-            state = max(0, state - 1);
+            connectionState = max(0, connectionState - 1);
             delay(1000);
             return;
         }
@@ -150,12 +149,12 @@ void loop() {
     motorTime = read_response();
     if (motorTime > 0) {
         Log.Info("Start motor: %d"CR, motorTime);
-        digitalWrite(12, HIGH);
+        digitalWrite(motorPin, HIGH);
         delay(motorTime * 1000);
-        digitalWrite(12, LOW);
+        digitalWrite(motorPin, LOW);
     }
 
-    state = 5;
+    connectionState = 5;
     Log.Info("wait");
     delay(50000 - (motorTime * 1000));
 }
