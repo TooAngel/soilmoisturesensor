@@ -80,3 +80,12 @@ http://www.arndt-bruenner.de/mathe/9/geradedurchzweipunkte.htm
  Gesuchte Funktion:
 
     f(x) = 13/75·x - 2867/75
+
+
+
+## Lint check
+
+```
+cp src/arduino.ino src/arduino.cpp
+cpplint src/arduino.cpp
+```
