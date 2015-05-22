@@ -159,6 +159,7 @@ int read_response() {
         Log.Info("!!! Iteration limit reached."CR);
     }
     client.stop();
+    Log.Info("Response: %d"CR, a);
     return a;
 }
 
