@@ -2,46 +2,41 @@
 #include <RedFlyClient.h>
 #include <Config.h>
 
+#include <Logging.h>
+
+#define LOGLEVEL LOG_LEVEL_DEBUG
+
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
 int sensorPin = A0;
 int sensorValue = 0;
+
+int baud = 9600;
+uint8_t pwr = LOW_POWER;
 
 bool connected = false;
 int state = 0;
 
 RedFlyClient client(server, 80);
 
-void log(String message) {
-	if (Serial) {
-		Serial.print(message);
-	}
-}
-
-void logln(String message) {
-	if (Serial) {
-		Serial.println(message);
-	}
-}
-
 bool rf_init() {
-	logln("rf_init");
+    Log.Info("RedFly.init %d %d"CR, baud, pwr);
 	uint8_t ret;
-	ret = RedFly.init(9600, LOW_POWER);
+	ret = RedFly.init(baud, pwr);
 	if (ret) {
-		logln("INIT ERROR");
+        Log.Error("RedFly.init %d"CR, ret);
 		return false;
 	}
 	return true;
 }
 
 bool rf_join() {
-	logln("rf_join");
+    Log.Info("RedFly.join %s"CR, BSSID);
 	uint8_t ret;
 	RedFly.scan();
 	ret = RedFly.join(BSSID, PASSWORD);
 	if (ret) {
-		logln("JOIN ERROR");
+        Log.Error("RedFly.join %d"CR, ret);
 		RedFly.disconnect();
 		return false;
 	}
@@ -50,11 +45,11 @@ bool rf_join() {
 }
 
 bool rf_begin() {
-	logln("rf_begin");
+    Log.Info("RedFly.begin"CR);
 	uint8_t ret;
 	ret = RedFly.begin();
 	if (ret) {
-		logln("BEGIN ERROR");
+        Log.Error("RedFly.begin %d"CR, ret);
 		RedFly.disconnect();
 		connected = false;
 		return false;
@@ -64,40 +59,54 @@ bool rf_begin() {
 }
 
 bool get_ip() {
-	logln("get_ip");
+    Log.Info("RedFly.getip %s"CR, HOSTNAME);
 	char* hostname_char;
-	if (RedFly.getip(HOSTNAME, server)) {
-		logln("DNS ERR");
+	uint8_t ret;
+	ret = RedFly.getip(HOSTNAME, server);
+	if (ret) {
+        Log.Error("RedFly.get_ip %d"CR, ret);
 		return false;
 	}
 	return true;
 }
 
 bool rf_set_client() {
-	logln("rf_set_client");
+    Log.Info("RedFlyClient %d.%d.%d.%d:%d"CR,
+             server[0],
+             server[1],
+             server[2],
+             server[3],
+             port);
 	client = RedFlyClient(server, 80);
 	return true;
 }
 
 bool read_sensor() {
-	log("read_sensor ");
+    Log.Info("Read sensor value: ");
 	sensorValue = analogRead(sensorPin);
-	logln(String(sensorValue));
+    Log.Info("%d"CR, sensorValue);
 	return true;
 }
 
 bool connect() {
-	logln("connect");
-	if (client.connect(server, port)) {
+    Log.Info("Connect(%d.%d.%d.%d:%d)"CR,
+              server[0],
+              server[1],
+              server[2],
+              server[3],
+              port);
+    uint8_t ret;
+    ret = client.connect(server, port);
+	if (ret) {
 		return true;
 	} else {
-		logln("CLIENT ERR: ");
-		return false;
+        Log.Error("Connect %d"CR, ret);
+        return false;
 	}
 }
 
 bool send_request() {
-	logln("send_request");
+    Log.Info("client.write"CR);
 	char resultChar[255];
 
 	get_request_data(resultChar);
@@ -118,7 +127,7 @@ void get_request_data(char* resultChar) {
 }
 
 int read_response() {
-	logln("read_response");
+    Log.Info("read_response"CR);
 	int a = 0;
 	int c;
 	unsigned int len = 0;
@@ -128,7 +137,7 @@ int read_response() {
 	int max = 1000;
 	for (i=0; i<max; i++) {
 		if (client.available()) {
-			logln("client.available");
+		    Log.Info("client.available"CR);
 			do {
 				c = client.read();
 				if ((c != -1) && (len < (sizeof(data) - 1))) {
@@ -141,13 +150,13 @@ int read_response() {
 		}
 
 		if (!client.connected()) {
-			logln("client.disconnected");
+			Log.Info("client.disconnected"CR);
 			break;
 		}
 		delay(1);
 	}
 	if (i == max) {
-		logln("!!! Iteration limit reached.");
+		Log.Info("!!! Iteration limit reached."CR);
 	}
 	client.stop();
 	return a;
@@ -156,6 +165,8 @@ int read_response() {
 bool (*states[8])();
 
 void setup() {
+    Log.Init(LOGLEVEL, 9600L);
+
 	pinMode(12, OUTPUT);
 	Serial.begin(9600);
 	states[0] = rf_init;
@@ -172,7 +183,7 @@ void loop() {
 	int motorTime = 0;
 	for (int i = state; i < 8; i++) {
 		if (!(*states[i])()) {
-			logln("failed");
+		    Log.Error("Execution failed %d"CR, i);
 			state = max(0, state - 1);
 			delay(1000);
 			return;
@@ -181,14 +192,13 @@ void loop() {
 
 	motorTime = read_response();
 	if (motorTime > 0) {
-		logln("Start motor");
-		logln(String(motorTime));
+		Log.Info("Start motor: %d"CR, motorTime);
 		digitalWrite(12, HIGH);
 		delay(motorTime * 1000);
 		digitalWrite(12, LOW);
 	}
 
 	state = 5;
-	logln("wait");
+	Log.Info("wait");
 	delay(50000 - (motorTime * 1000));
 }
