@@ -145,7 +145,7 @@ int read_response() {
                 }
             } while (c != -1);
             data[len] = 0;
-            a = data[168] - '0';
+            a = data[169] - '0';
             break;
         }
 
