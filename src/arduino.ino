@@ -120,7 +120,7 @@ bool read_response() {
     motorTime = parse_response(client);
     Log.Debug("response: %d"CR, motorTime);
     client.stop();
-    Log.Debug("client stopped");
+    Log.Debug("client stopped"CR);
     return true;
 }
 
@@ -167,6 +167,6 @@ void loop() {
     start_motor();
 
     connectionState = 5;
-    Log.Info("wait");
+    Log.Info("wait"CR);
     delay(50000 - (motorTime * 1000));
 }
