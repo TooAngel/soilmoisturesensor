@@ -137,7 +137,7 @@ bool start_motor() {
 
 bool waiting() {
     Log.Info("Waiting"CR);
-    delay(60 - motorTime);
+    delay(20000 - (motorTime * 1000));
     Log.Debug("Waiting done"CR);
     motorTime = 0;
     connectionState = 5;
