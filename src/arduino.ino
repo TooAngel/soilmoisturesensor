@@ -115,10 +115,15 @@ bool send_request() {
     return true;
 }
 
-int read_response() {
+bool read_response() {
     Log.Info("read_response"CR);
-    return parse_response(client);
+    motorTime = parse_response(client);
+    Log.Debug("response: %d"CR, motorTime);
+    client.stop();
+    Log.Debug("client stopped");
+    return true;
 }
+
 
 bool (*connectionStates[8])();
 
@@ -147,7 +152,7 @@ void loop() {
         }
     }
 
-    motorTime = read_response();
+    read_response();
     if (motorTime > 0) {
         Log.Info("Start motor: %d"CR, motorTime);
         digitalWrite(motorPin, HIGH);
