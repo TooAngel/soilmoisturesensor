@@ -131,10 +131,19 @@ bool start_motor() {
         digitalWrite(motorPin, HIGH);
         delay(motorTime * 1000);
         digitalWrite(motorPin, LOW);
-        motorTime = 0;
     }
     return true;
 }
+
+bool waiting() {
+    Log.Info("Waiting"CR);
+    delay(60 - motorTime);
+    Log.Debug("Waiting done"CR);
+    motorTime = 0;
+    connectionState = 5;
+    return true;
+}
+
 
 bool (*connectionStates[8])();
 
@@ -165,8 +174,5 @@ void loop() {
 
     read_response();
     start_motor();
-
-    connectionState = 5;
-    Log.Info("wait"CR);
-    delay(50000 - (motorTime * 1000));
+    waiting();
 }
