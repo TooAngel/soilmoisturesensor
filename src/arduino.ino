@@ -124,6 +124,17 @@ bool read_response() {
     return true;
 }
 
+bool start_motor() {
+    Log.Info("start_motor"CR);
+    if (motorTime > 0) {
+        Log.Info("Start motor %d"CR, motorTime);
+        digitalWrite(motorPin, HIGH);
+        delay(motorTime * 1000);
+        digitalWrite(motorPin, LOW);
+        motorTime = 0;
+    }
+    return true;
+}
 
 bool (*connectionStates[8])();
 
@@ -153,12 +164,7 @@ void loop() {
     }
 
     read_response();
-    if (motorTime > 0) {
-        Log.Info("Start motor: %d"CR, motorTime);
-        digitalWrite(motorPin, HIGH);
-        delay(motorTime * 1000);
-        digitalWrite(motorPin, LOW);
-    }
+    start_motor();
 
     connectionState = 5;
     Log.Info("wait");
