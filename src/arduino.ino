@@ -145,7 +145,7 @@ bool waiting() {
 }
 
 
-bool (*connectionStates[8])();
+bool (*connectionStates[10])();
 
 void setup() {
     Log.Init(LOGLEVEL, 9600L);
@@ -160,10 +160,14 @@ void setup() {
     connectionStates[5] = read_sensor;
     connectionStates[6] = connect;
     connectionStates[7] = send_request;
+    connectionStates[8] = read_response;
+    connectionStates[9] = start_motor;
 }
 
 void loop() {
-    for (int i = connectionState; i < 8; i++) {
+    for (int i = connectionState; i < 10; i++) {
+        Log.Debug("Executing connection state: %d"CR, i);
+
         if (!(*connectionStates[i])()) {
             Log.Error("Execution failed %d"CR, i);
             connectionState = max(0, connectionState - 1);
@@ -172,7 +176,5 @@ void loop() {
         }
     }
 
-    read_response();
-    start_motor();
     waiting();
 }
