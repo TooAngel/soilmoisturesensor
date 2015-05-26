@@ -151,7 +151,7 @@ void setup() {
     Log.Init(LOGLEVEL, 9600L);
 
     pinMode(motorPin, OUTPUT);
-    Serial.begin(9600);
+
     connectionStates[0] = rf_init;
     connectionStates[1] = rf_join;
     connectionStates[2] = rf_begin;
