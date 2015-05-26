@@ -42,8 +42,8 @@ int parse_response(RedFlyClient client) {
     return a;
 }
 
-void get_request_data(char* name, char* hostname, int sensorValue,
-        char* resultChar) {
+void get_request_data(char* name,
+        char* hostname, int sensorValue, char* resultChar) {
     String data = "POST /sensors/";
     data += name;
     data += "/points/ HTTP/1.1\r\nHost:";

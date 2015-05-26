@@ -21,6 +21,8 @@ int motorPin = 12;
 int connectionState = 0;
 uint8_t ret;
 
+int motorTime = 0;
+
 int baud = 9600;
 uint8_t pwr = LOW_POWER;
 
@@ -136,7 +138,6 @@ void setup() {
 }
 
 void loop() {
-    int motorTime = 0;
     for (int i = connectionState; i < 8; i++) {
         if (!(*connectionStates[i])()) {
             Log.Error("Execution failed %d"CR, i);
