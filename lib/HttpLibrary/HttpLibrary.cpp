@@ -8,7 +8,7 @@
 
 int parse_response(RedFlyClient client) {
     int a = 0;
-    int c;
+    char c;
     unsigned int len = 0;
     char data[1024];
     data[len] = 0;
