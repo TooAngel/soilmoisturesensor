@@ -118,8 +118,8 @@ bool send_request() {
 bool read_response() {
     Log.Info("read_response"CR);
     motorTime = parse_response(client);
-    Log.Debug("response: %d"CR, motorTime);
     client.stop();
+    Log.Debug("response: %d"CR, motorTime);
     Log.Debug("client stopped"CR);
     return true;
 }
