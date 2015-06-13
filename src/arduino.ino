@@ -8,7 +8,7 @@
 #include <HttpLibrary.h>
 #include <Logging.h>
 
-#define LOGLEVEL LOG_LEVEL_DEBUG
+#define LOGLEVEL LOG_LEVEL_VERBOSE
 
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
@@ -24,7 +24,7 @@ uint8_t ret;
 int motorTime = 0;
 
 int baud = 9600;
-uint8_t pwr = LOW_POWER;
+uint8_t pwr = MED_POWER;
 
 RedFlyClient client;
 
