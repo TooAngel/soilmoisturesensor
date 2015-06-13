@@ -57,10 +57,12 @@ int readStatusCode(char c) {
 }
 
 void readStatusMessage(char c) {
-    Serial.println(c);
     if (c == '\n') {
         statusMessage[statusMessagePos++] = '\0';
-        Log.Verbose("Message %s"CR, statusMessage);
+        // Don't know, but this line does not work
+//        Log.Verbose("Message %s"CR, statusMessage);
+        Serial.print("Message ");
+        Serial.println(statusMessage);
         parseState = ReadHeader;
         return;
     }
@@ -170,7 +172,7 @@ int receive_data(RedFlyClient client) {
 
     do {
         c = client.read();
-
+        Serial.println(c);
         read_parts(c);
 
         if ((c != -1) && (len < (sizeof(data) - 1))) {
@@ -187,8 +189,10 @@ int parse_response(RedFlyClient client) {
     parseState = ReadProtocol;
     protocolPtr = protocolPrefix;
     protocolPos = 0;
+    protocol[0] = '\0';
     statusCode = 0;
     statusMessagePos = 0;
+    statusMessage[0] = '\0';
 
     int i = 0;
     int max = 10000;
