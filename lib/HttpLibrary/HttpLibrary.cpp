@@ -18,6 +18,8 @@ int statusCode;
 unsigned int statusMessagePos;
 char statusMessage[20];
 
+int headerlinePos;
+
 // unsigned int dataPos = 0;
 // int return_int = 0;
 //
@@ -25,7 +27,6 @@ char statusMessage[20];
 //
 
 // char headerline[100];
-// int headerlinePos = 0;
 // int contentLength = 0;
 //
 //
@@ -69,7 +70,8 @@ void readStatusMessage(char c) {
     statusMessage[statusMessagePos++] = c;
 }
 
-// void readHeader() {
+void readHeader(char c) {
+//    Serial.println(c);
 //    if (c == '\n') {
 //        if (headerlinePos == 1) {
 //            Log.Debug("Empty line found - finishing headers"CR);
@@ -83,7 +85,7 @@ void readStatusMessage(char c) {
 //    }
 //
 //    headerline[headerlinePos++] = c;
-// }
+}
 //
 // int readData() {
 //    Log.Info("ReadData %c"CR, c);
@@ -143,16 +145,16 @@ int read_parts(char c) {
         readProtocol(c);
         break;
     case ReadStatusCode:
-        if (readStatusCode(c)) {
-            return 0;
-        }
+//        if (readStatusCode(c)) {
+//            return 0;
+//        }
         break;
     case ReadStatusMessage:
-        readStatusMessage(c);
+//        readStatusMessage(c);
         break;
-//    case ReadHeader:
-//        readHeader();
-//        break;
+    case ReadHeader:
+//        readHeader(c);
+        break;
 //    case ReadData:
 //        readData();
 //        break;
@@ -172,7 +174,7 @@ int receive_data(RedFlyClient client) {
 
     do {
         c = client.read();
-        Serial.println(c);
+//        Serial.println(c);
         read_parts(c);
 
         if ((c != -1) && (len < (sizeof(data) - 1))) {
@@ -193,6 +195,7 @@ int parse_response(RedFlyClient client) {
     statusCode = 0;
     statusMessagePos = 0;
     statusMessage[0] = '\0';
+    headerlinePos = 0;
 
     int i = 0;
     int max = 10000;
