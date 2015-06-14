@@ -8,7 +8,7 @@
 #include <HttpLibrary.h>
 #include <Logging.h>
 
-#define LOGLEVEL LOG_LEVEL_VERBOSE
+#define LOGLEVEL LOG_LEVEL_INFOS
 
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
