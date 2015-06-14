@@ -94,52 +94,6 @@ int readData(char c) {
     return_int = c - '0';
     parseState = Done;
 }
-//
-// int receive_data(RedFlyClient client) {
-//    dataPos = 0;
-//    return_int = 0;
-//    c = '\0';
-//    parseState = ReadProtocol;
-//    protocolPos = 0;
-//    protocolPtr = protocolPrefix;
-//    statusMessagePos = 0;
-//    statusCode = 0;
-//    headerlinePos = 0;
-//    contentLength = 0;
-//
-//    do {
-//        c = client.read();
-//        if (c != -1) {
-//            switch (parseState) {
-//            case ReadProtocol:
-//                readProtocol();
-//                break;
-//            case ReadStatusCode:
-//                if (readStatusCode()) {
-//                    return 0;
-//                }
-//                break;
-//            case ReadStatusMessage:
-//                readStatusMessage();
-//                break;
-//            case ReadHeader:
-//                readHeader();
-//                break;
-//            case ReadData:
-//                readData();
-//                break;
-//            case Done:
-//                Log.Debug("Done"CR);
-//                return return_int;
-//                break;
-//            }
-//        } else {
-//            Log.Error("client.read %c"CR, c);
-//        }
-//    } while (c != -1);
-//    return return_int;
-// }
-//
 
 int read_parts(char c) {
     switch (parseState) {
@@ -162,33 +116,24 @@ int read_parts(char c) {
         break;
     case Done:
 //        Log.Debug("Done"CR);
-//        return return_int;
+        return return_int;
         break;
     }
+    return -1;
 }
 
 int receive_data(RedFlyClient client) {
-    int a = 0;
     char c;
-    unsigned int len = 0;
-    char data[1024];
-    data[len] = 0;
     return_int = 0;
 
     do {
         c = client.read();
-//        Serial.println(c);
-        read_parts(c);
-
-        if ((c != -1) && (len < (sizeof(data) - 1))) {
-            data[len++] = c;
+        if (read_parts(c) != -1) {
+            break;
         }
     } while (c != -1);
-    data[len] = 0;
-//    a = data[169] - '0';
-//    Serial.println(data[169]);
     Serial.println(return_int);
-    return a;
+    return return_int;
 }
 
 int parse_response(RedFlyClient client) {
