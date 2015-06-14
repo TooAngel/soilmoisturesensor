@@ -72,7 +72,6 @@ void readStatusMessage(char c) {
 }
 
 void readHeader(char c) {
-//    Serial.println(c);
     if (c == '\n') {
         if (headerlinePos == 1) {
 //            Log.Debug("Empty line found - finishing headers"CR);
@@ -132,6 +131,10 @@ int receive_data(RedFlyClient client) {
             break;
         }
     } while (c != -1);
+    if (parseState != Done) {
+        Log.Error("Parsing did not reach done state: %d"CR, parseState);
+    }
+    Serial.println("Response");
     Serial.println(return_int);
     return return_int;
 }
