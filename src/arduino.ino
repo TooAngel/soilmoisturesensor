@@ -13,6 +13,8 @@
 byte server[] = { 192, 168, 178, 25 };
 int port = 80;
 
+int waitTime = 360000;
+
 int sensorPin = A0;
 int sensorValue = 0;
 
@@ -137,7 +139,7 @@ bool start_motor() {
 
 bool waiting() {
     Log.Info("Waiting"CR);
-    delay(360000 - (motorTime * 1000));
+    delay(waitTime - (motorTime * 1000));
     Log.Debug("Waiting done"CR);
     motorTime = 0;
     connectionState = 5;
